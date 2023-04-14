@@ -1,5 +1,5 @@
-import { Directory } from "./directory"
-import { Path } from "./path"
+import { Directory } from "../io/directory"
+import { Path } from "../io/path"
 class dirNode<T>{
  public data:T
  public next:dirNode<T> |null

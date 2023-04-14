@@ -1,7 +1,7 @@
 import express, {Request, Response, Application} from 'express';
 import {Path} from './io/path'
 import { Directory } from './io/directory';
-import { DirTree } from './io/dirtree';
+import { DirTree } from './ds/dirtree';
 
 const app:Application=express()
 
