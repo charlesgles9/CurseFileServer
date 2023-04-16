@@ -5,17 +5,20 @@
   "main": "./src/server.ts",
   "scripts": {
     "start": "ts-node ./src/server.ts",
-    "dev":"nodemon ./src/server.ts"
+    "dev": "nodemon ./src/server.ts"
   },
   "author": "LazyChucky",
   "license": "ISC",
   "dependencies": {
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "nodemon": "^2.0.22",
     "smb2": "^0.2.11"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.3",
+    "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",
     "@types/node": "^18.15.11",
     "ts-node": "^10.9.1"

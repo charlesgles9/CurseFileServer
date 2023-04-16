@@ -5,8 +5,10 @@ export class Directory{
     
     private path:Path
     private entries:Path[]=[]
+  
     constructor(path:Path){
         this.path=path
+       
     }
 
    public getPath():Path{
@@ -20,13 +22,21 @@ export class Directory{
              //create a path object
               this.entries=files
              .map((value)=>new Path(`${this.path.toString()}/${value}`))
-             // //apply filter
-             if(fileFilter){
+             //apply filter
+             if(fileFilter)
                 this.entries=this.entries.filter(fileFilter)
-             }
+           
+            
              return resolve(this.entries)
           })
        })
+    }
+
+   
+    public async deleteFiles(...list:Path[]):Promise<Path[]>{
+        return new Promise<Path[]>((resolve,reject)=>{
+
+        })
     }
 
     public getEntries():Path[]{

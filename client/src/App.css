@@ -1,0 +1,92 @@
+:root{
+  --primary:#57839c;
+  --secondary:black;
+}
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #f1ba42);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.v-container{
+  display: inline-block;
+  margin:10px;
+}
+
+.f-container{
+  display: block;
+  border-radius: 5px;
+  margin:10px;
+ 
+}
+.file-list-view{
+  display: flex;
+  flex-direction:row;
+  padding: 0px;
+ 
+}
+
+.shadow{
+  box-shadow: 1px 3px 3px 3px  rgb(72, 87, 86);
+}
+.align-end{
+  align-self: self-start;
+}
+.justify-between{
+  justify-content: space-between;
+}
+.file-list-view img{
+  width: 60px;
+  margin: 0px;
+  padding: 5px;
+}
+
+.file-name{
+   color: var(--primary);
+   margin: 0px;
+   padding:5px;
+   width: 300px;
+   overflow: hidden;
+   white-space: nowrap;
+   text-overflow:ellipsis;
+}
+
+.file-path{
+  color: var(--secondary);
+  font-size: 10pt;
+  margin: 0px ;
+  max-width: 300px;
+  max-height: 10pt;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  align-self: center;
+}
+
+.f-container p{
+  margin:5px;
+  font-size: 9pt;
+}
+

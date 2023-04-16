@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 import { statSync } from 'fs';
+import { FileUtil } from '../utils/fileutil';
 export class Path{
 
     private path:String
@@ -45,6 +46,14 @@ export class Path{
         return this.path.toString()
     }
 
+     public toObject():any{
+        const stats = statSync(this.toString())
+       return {name:this.fileName(),path:this.path, parent:this.parent(),
+         birthTime:stats.birthtimeMs,size:stats.size,
+         isDirectory:stats.isDirectory(),
+         sizeStr:FileUtil.convertBytesWordNotation(stats.size)}
+     }
+
     public isFile():boolean{
         try {
             const stats = statSync(this.toString()) // console.log(stats)
@@ -57,5 +66,9 @@ export class Path{
 
     public isFolder():boolean{
         return !this.isFile()
+    }
+
+    public isHidden():boolean{
+        return this.fileName()[0]==="."
     }
 }
