@@ -30,13 +30,24 @@
   }
 }
 
+.App{
+  
+  display: block;
+  flex-direction: row;
+  border: solid;
+  width:calc(100%-100px);
+  padding: 0px;
+  margin: 0px;
+}
 .v-container{
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
   margin:10px;
+ 
 }
 
 .f-container{
-  display: block;
+  display: inline-block;
   border-radius: 5px;
   margin:10px;
  
@@ -50,6 +61,10 @@
 
 .shadow{
   box-shadow: 1px 3px 3px 3px  rgb(72, 87, 86);
+}
+
+.shadow:active{
+  box-shadow: 1px 3px 3px 3px inset rgb(72, 87, 86);
 }
 .align-end{
   align-self: self-start;
@@ -88,5 +103,29 @@
 .f-container p{
   margin:5px;
   font-size: 9pt;
+}
+
+/* bread crumbs pagination*/
+ul.breadcrumb {
+  padding: 10px 16px;
+  list-style: none;
+  background-color: #eee;
+}
+ul.breadcrumb li {
+  display: inline;
+  font-size: 18px;
+}
+ul.breadcrumb li+li:before {
+  padding: 8px;
+  color: black;
+  content: "/\00a0";
+}
+ul.breadcrumb li a {
+  color: #0275d8;
+  text-decoration: none;
+}
+ul.breadcrumb li a:hover {
+  color: #01447e;
+  text-decoration: underline;
 }
 

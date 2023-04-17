@@ -56,28 +56,32 @@ export class DirTree{
         }
         return
       }
-      current = current.next;
+      current = current.next
     }
 
    }
 
    public toArray():Directory[]{
-    let current = this.head;
+    let current = this.head
         const dirs = [];
     while (current !== null) {
-        dirs.push(current.data);
-        current = current.next;
+        dirs.push(current.data)
+        current = current.next
     }
      return dirs
    }
 
+   public getCurrentDirectory():Directory |undefined{
+      return this.tail?.data||this.head?.data
+   }
+
    public print(): void {
-    let current = this.head;
+    let current = this.head
     const dirs = [];
     while (current !== null) {
-      dirs.push(current.data.getPath().fileName());
-      current = current.next;
+      dirs.push(current.data.getPath().fileName())
+      current = current.next
     }
-    console.log(dirs.join(' -> '));
+    console.log(dirs.join(' -> '))
   }
 }

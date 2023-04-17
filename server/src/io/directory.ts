@@ -25,8 +25,6 @@ export class Directory{
              //apply filter
              if(fileFilter)
                 this.entries=this.entries.filter(fileFilter)
-           
-            
              return resolve(this.entries)
           })
        })
