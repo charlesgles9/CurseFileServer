@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import Axios from 'axios'
+import BreadCrumb from './components/BreadCrumb'
 
 
 function fileView(value:any,callback:()=>void){
@@ -25,33 +26,37 @@ function fileView(value:any,callback:()=>void){
 function App() {
 
   const [files,setFiles]=useState([])
+  const [dir,setDir]=useState("/")
   const axios=Axios.create({ withCredentials:true})
   useEffect(()=>{
    axios.get("http://localhost:8000/").then((response)=>{
-       setFiles(response.data)
+       const data=response.data
+       setFiles(data.files)
+       setDir(data.dir)
    })
   },[])
 
   const opendir=(folder:any)=>{
     axios.get(`http://localhost:8000/opendir/`,{params:{path:folder.path}}).then((response)=>{
-       setFiles(response.data)
+      const data=response.data
+       setFiles(data.files)
+       setDir(data.dir)
    })
   }
   const closedir=(folder:any)=>{
-    axios.get(`http://localhost:8000/closedir/`,{params:{path:folder.parent}}).then((response)=>{
-      setFiles(response.data)
+    axios.get(`http://localhost:8000/closedir/`,{params:{path:folder}}).then((response)=>{
+      const data=response.data
+      setFiles(data.files)
+      setDir(data.dir)
   })
   }
 
+  
   return (
     <div className="App">
-      <button onClick={()=>{closedir(files[0])}}>PREV</button>
-      <ul className ="breadcrumb">
-          <li><a href="#">Home</a></li>
-          <li><a href="#">Pictures</a></li>
-          <li><a href="#">Summer 15</a></li>
-          <li>Italy</li>
-           </ul>
+      <button onClick={()=>{closedir(dir)}}>PREV</button>
+      
+        {(<BreadCrumb path={dir}/>)}
          <div className='v-container'>
             {
               files.map((file,index)=>{

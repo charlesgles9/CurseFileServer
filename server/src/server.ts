@@ -23,7 +23,7 @@ app.get("/", (req:Request, res:Response):void=>{
        const objectPromises=files.map(toObjectAsync)
        Promise.all(objectPromises)
        .then((data)=>{
-         res.send(data)
+         res.send({files:data,dir:dir.getPath().toString()})
        })
     })
     .catch(error=>console.log(error))
@@ -31,29 +31,32 @@ app.get("/", (req:Request, res:Response):void=>{
 
 app.get("/opendir/",(req,res)=>{
    const {path}=req.query
-   const dir:Directory=dirTree.opendir(new Path(path as string))
+   const file=new Path(path as string)
+  if(file.isFolder()){
+   const dir:Directory=dirTree.opendir(file)
    dir.listFiles((value:Path)=> !value.isHidden() ).then((files)=>{
        const toObjectAsync=async(path:Path)=>{return path.toObject()}
        const objectPromises=files.map(toObjectAsync)
        Promise.all(objectPromises)
        .then((data)=>{
-         res.send(data)
+        res.send({files:data,dir:dir.getPath().toString()})
        })
     })
     .catch(error=>console.log(error))
+  }
 })
 
 app.get("/closedir/",(req,res)=>{
     const {path}=req.query
     //close the current directory
     dirTree.closeDir(new Path(path as string))
-    // open the next directory
+    // open the next directory if not null
     const entries=dirTree.getCurrentDirectory()?.getEntries()
     const toObjectAsync=async(path:Path)=>{return path.toObject()}
     const objectPromises=entries?.map(toObjectAsync)
     if(objectPromises)
     Promise.all(objectPromises).then((data)=>{
-        res.send(data)
+        res.send({files:data,dir:dirTree.getCurrentDirectory()?.getPath().toString()})
     })
     
 })
