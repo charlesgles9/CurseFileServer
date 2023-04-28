@@ -46,7 +46,7 @@ export class DirTree{
         return
     }
       
-    let current = this.head;
+    let current = this.head
     while (current.next !== null) {
         // remove this node 
       if (current.next.data.getPath().toString() === path.toString()) {
@@ -63,7 +63,7 @@ export class DirTree{
 
    public toArray():Directory[]{
     let current = this.head
-        const dirs = [];
+        const dirs = []
     while (current !== null) {
         dirs.push(current.data)
         current = current.next
@@ -77,7 +77,7 @@ export class DirTree{
 
    public print(): void {
     let current = this.head
-    const dirs = [];
+    const dirs = []
     while (current !== null) {
       dirs.push(current.data.getPath().fileName())
       current = current.next

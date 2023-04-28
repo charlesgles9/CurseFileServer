@@ -29,6 +29,19 @@ app.get("/", (req:Request, res:Response):void=>{
     .catch(error=>console.log(error))
 })
 
+app.get("/writable/dirs/", (req, res)=>{
+   const baseDir="/"
+   const dir:Directory=new DirTree().opendir(new Path(baseDir))
+     dir.listFiles((value:Path)=>!value.isHidden()).then((files)=>{
+      const toObjectAsync=async(path:Path)=>{return path.toObject()}
+      const objectPromises=files.map(toObjectAsync)
+      Promise.all(objectPromises)
+      .then((data)=>{
+        res.send({files:data,dir:dir.getPath().toString()})
+      })
+     }).catch(error=>console.log(error))
+})
+
 app.get("/opendir/",(req,res)=>{
    const {path}=req.query
    const file=new Path(path as string)
@@ -48,6 +61,7 @@ app.get("/opendir/",(req,res)=>{
 
 app.get("/closedir/",(req,res)=>{
     const {path}=req.query
+  if(path!=os.homedir()){
     //close the current directory
     dirTree.closeDir(new Path(path as string))
     // open the next directory if not null
@@ -58,6 +72,7 @@ app.get("/closedir/",(req,res)=>{
     Promise.all(objectPromises).then((data)=>{
         res.send({files:data,dir:dirTree.getCurrentDirectory()?.getPath().toString()})
     })
+}
     
 })
 app.listen(PORT,():void=>{

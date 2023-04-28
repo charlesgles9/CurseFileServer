@@ -34,7 +34,6 @@
   
   display: block;
   flex-direction: row;
-  border: solid;
   width:calc(100%-100px);
   padding: 0px;
   margin: 0px;
@@ -44,6 +43,11 @@
   flex-direction: column;
   margin:10px;
  
+}
+.h-container{
+  display: flex;
+  flex-direction: row;
+  padding:10px;
 }
 
 .f-container{
@@ -82,7 +86,7 @@
    color: var(--primary);
    margin: 0px;
    padding:5px;
-   width: 300px;
+   width: 250px;
    overflow: hidden;
    white-space: nowrap;
    text-overflow:ellipsis;
@@ -105,27 +109,62 @@
   font-size: 9pt;
 }
 
-/* bread crumbs pagination*/
-ul.breadcrumb {
-  padding: 10px 16px;
-  list-style: none;
-  background-color: #eee;
+.dark-bg{
+  background-color: black;
 }
-ul.breadcrumb li {
-  display: inline;
-  font-size: 18px;
+
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: "/" !important;
+  font-size: 10px;
 }
-ul.breadcrumb li+li:before {
-  padding: 8px;
-  color: black;
-  content: "/\00a0";
+
+.breadcrumb-text{
+  display: inline-block;
+  font-size: 10px;
+  max-width: 100px !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
 }
-ul.breadcrumb li a {
-  color: #0275d8;
-  text-decoration: none;
+
+.padding-lg{
+  padding-top: 120px  !important;
 }
-ul.breadcrumb li a:hover {
-  color: #01447e;
-  text-decoration: underline;
+.drawer-container{
+  position: relative;
+  left: 0;
+  top: 0;
+}
+
+.drawer{
+  position: fixed;
+  width: 350px !important;
+  height: 100vh;
+  left: 0;
+  -webkit-transition: left 0.5s ease-in-out;
+  -moz-transition: left 0.5s ease-in-out;
+  -o-transition: left 0.5s ease-in-out;
+  transition: left 0.5s ease-in-out;
+}
+
+.close-drawer{
+  left: -500px;
+}
+.open-drawer{
+  left: 0;
+}
+.drawer-items{
+  position: absolute;
+  top: 100px;
+  left: 0;
+}
+
+.drawer-item{
+  width: 300px !important;
+}
+
+.drawer-item:hover{
+  background-color: rgba(5, 5, 5, 0.308) !important;
 }
 

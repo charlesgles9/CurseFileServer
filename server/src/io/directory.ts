@@ -25,6 +25,8 @@ export class Directory{
              //apply filter
              if(fileFilter)
                 this.entries=this.entries.filter(fileFilter)
+                // sort the folders to the top of the list 
+              this.entries.sort((a,b)=>(a.isFolder()&&b.isFile())?-1:1)
              return resolve(this.entries)
           })
        })
