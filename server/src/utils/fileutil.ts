@@ -1,6 +1,6 @@
 export class FileUtil{
    
-    static SIZE_KB=1024
+    static SIZE_KB=1000
     static SIZE_MB=this.SIZE_KB*this.SIZE_KB
     static SIZE_GB=this.SIZE_MB*this.SIZE_KB
     static SIZE_TB=this.SIZE_GB*this.SIZE_KB

@@ -5,6 +5,9 @@ import { DirTree } from './ds/dirtree'
 import os from 'os'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import { FileUtil } from './utils/fileutil'
+import { ImgLoader } from './utils/ImgLoader'
+
 const app:Application=express()
 
 app.use(express.json())
@@ -25,8 +28,10 @@ app.get("/", (req:Request, res:Response):void=>{
        .then((data)=>{
          res.send({files:data,dir:dir.getPath().toString()})
        })
+       
     })
     .catch(error=>console.log(error))
+   
 })
 
 app.get("/writable/dirs/", (req, res)=>{
@@ -53,10 +58,21 @@ app.get("/opendir/",(req,res)=>{
        Promise.all(objectPromises)
        .then((data)=>{
         res.send({files:data,dir:dir.getPath().toString()})
+        
+      /*  dir.listFilesRecursive((value:Path)=> !value.isHidden()).then(files=>{
+          Directory.fileListSize(files).then(bytes=>{
+            console.log(bytes)
+            console.log(FileUtil.convertBytesWordNotation(bytes))
+          })
+          
+       })*/
+    
        })
     })
     .catch(error=>console.log(error))
+  
   }
+  
 })
 
 app.get("/closedir/",(req,res)=>{
@@ -75,6 +91,17 @@ app.get("/closedir/",(req,res)=>{
 }
     
 })
+
+app.get("/thumbnail", (req,res)=>{
+    const {files}=req.query
+    ImgLoader.load(files as string[])
+    .then((buffers=>{
+       res.send(buffers)
+    })).catch((error)=>{
+       console.log(error.message)
+    })
+})
+
 app.listen(PORT,():void=>{
     console.log("Server started!")
 })

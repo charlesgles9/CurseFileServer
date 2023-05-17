@@ -23,6 +23,9 @@ export class Path{
         return this.path.substring(this.path.lastIndexOf(".")+1)
     }
 
+    static getExtension(path:string){
+       return  path.substring(path.lastIndexOf(".")+1)
+    }
     public parent():String{
         return this.path.substring(0,this.path.lastIndexOf("/"))
     }
@@ -47,16 +50,26 @@ export class Path{
     }
 
      public toObject():any{
-        const stats = statSync(this.toString())
+        const stats = this.getStats()
        return {name:this.fileName(),path:this.path, parent:this.parent(),
          birthTime:stats.birthtimeMs,size:stats.size,
          isDirectory:stats.isDirectory(),
          sizeStr:FileUtil.convertBytesWordNotation(stats.size)}
      }
 
+    public size():number{
+        const stats= this.getStats()
+        return stats.size
+    }
+
+    public getStats():fs.Stats{
+        
+        return statSync(this.toString())
+    }
+    
     public isFile():boolean{
         try {
-            const stats = statSync(this.toString()) // console.log(stats)
+            const stats = this.getStats()// console.log(stats)
             return stats.isFile()
           } catch (err) {
             console.error(err)
@@ -65,7 +78,14 @@ export class Path{
     }
 
     public isFolder():boolean{
-        return !this.isFile()
+        try {
+            fs.accessSync(this.toString())
+            const stats = this.getStats()// console.log(stats)
+            return stats.isDirectory()
+          } catch (err) {
+            console.error(err)
+            return false
+          }
     }
 
     public isHidden():boolean{

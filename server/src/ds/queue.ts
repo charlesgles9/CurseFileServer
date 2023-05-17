@@ -12,7 +12,7 @@ export class Queue<T>{
     }
 
      public enqueue(item:T){
-        if(this.pool<this.size())
+        if(this.pool>this.size())
            this.data.push(item)
      }
 
