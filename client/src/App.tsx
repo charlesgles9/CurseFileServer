@@ -3,14 +3,16 @@ import './App.css'
 import Axios from 'axios'
 import BreadCrumb from './components/BreadCrumb'
 import { Navbar } from 'react-bootstrap'
-
+import {Buffer}  from 'buffer'
 
 function fileView(value:any,callback:()=>void){
   const date:Date=new Date(value.birthTime)
+  const src=value.thumb!=null?value.thumb:value.isDirectory?'./folder.png':"./file.png"
+   
   return<div className='shadow p-2 rounded m-1' onClick={()=>{callback()}}>
      
      <div className='row p-1' >
-        <img className='p-1 col-5' style={{width:"70px"}} src={value.isDirectory?'./folder.png':"./file.png"}></img>
+        <img className='p-1 col-5' style={{width:"70px"}} src={src}></img>
         <div className='col-5'>
         <h4 className='file-name fs-5'> {value.name}</h4>
         <p className='file-path'>{value.path}</p>
@@ -51,6 +53,13 @@ function App() {
          const values=dvalues.map((value)=>{return {path:`${data.dir}/${value}`,name:value }})
          setfdirs(values)
        }
+      
+       axios.get("http://localhost:8000/thumbnail",{params:{files:data.files.map((value:any)=>{return value.path})}}).then((response)=>{
+             const files=data.files.map((f:any,i:number)=>
+              {f["thumb"]=response.data[i]!=null? 'data:image/png;base64,'+
+              Buffer.from(response.data[i],"binary").toString('base64'):null; return f})
+             setFiles(files)
+       })
 
    })
    
@@ -62,6 +71,13 @@ function App() {
       const data=response.data
        setFiles(data.files)
        setDir(data.dir)
+       axios.get("http://localhost:8000/thumbnail",{params:{files:data.files.map((value:any)=>{return value.path})}}).then((response)=>{
+        const files=data.files.map((f:any,i:number)=>
+        {f["thumb"]=response.data[i]!=null? 'data:image/png;base64,'+
+        Buffer.from(response.data[i],"binary").toString('base64'):null; return f})
+       setFiles(files)
+  })
+
    })
   }
   const closedir=(folder:any)=>{
