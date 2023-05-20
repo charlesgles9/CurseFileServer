@@ -26,7 +26,7 @@ app.get("/", (req:Request, res:Response):void=>{
        const objectPromises=files.map(toObjectAsync)
        Promise.all(objectPromises)
        .then((data)=>{
-         res.send({files:data,dir:dir.getPath().toString()})
+         res.send({files:data,dir:dir.getPath().toString(),parent:dir.getPath().parent().toString()})
        })
        
     })
@@ -57,7 +57,7 @@ app.get("/opendir/",(req,res)=>{
        const objectPromises=files.map(toObjectAsync)
        Promise.all(objectPromises)
        .then((data)=>{
-        res.send({files:data,dir:dir.getPath().toString()})
+        res.send({files:data,dir:dir.getPath().toString(),parent:dir.getPath().parent().toString()})
         
       /*  dir.listFilesRecursive((value:Path)=> !value.isHidden()).then(files=>{
           Directory.fileListSize(files).then(bytes=>{
@@ -86,7 +86,8 @@ app.get("/closedir/",(req,res)=>{
     const objectPromises=entries?.map(toObjectAsync)
     if(objectPromises)
     Promise.all(objectPromises).then((data)=>{
-        res.send({files:data,dir:dirTree.getCurrentDirectory()?.getPath().toString()})
+        const path=dirTree.getCurrentDirectory()?.getPath()
+        res.send({files:data,dir:path?.toString(),parent:path?.parent().toString()})
     })
 }
     
