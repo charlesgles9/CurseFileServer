@@ -93,10 +93,10 @@ app.get("/closedir/",(req,res)=>{
 })
 
 app.get("/thumbnail", (req,res)=>{
-    const {files}=req.query
-    ImgLoader.load(files as string[])
+    const {files}=req.query 
+    ImgLoader.loadImageThumbnail(files as string[])
     .then((buffers=>{
-       res.send(buffers)
+       res.send({buffers:buffers,parent:new Path((files as string[])[0]).parent().toString()})
     })).catch((error)=>{
        console.log(error.message)
     })

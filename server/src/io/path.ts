@@ -20,7 +20,7 @@ export class Path{
     }
 
     public extension():String{
-        return this.path.substring(this.path.lastIndexOf(".")+1)
+        return  this.path.substring(this.path.lastIndexOf(".")+1)
     }
 
     static getExtension(path:string){
@@ -54,6 +54,7 @@ export class Path{
        return {name:this.fileName(),path:this.path, parent:this.parent(),
          birthTime:stats.birthtimeMs,size:stats.size,
          isDirectory:stats.isDirectory(),
+         extension:this.extension(),
          sizeStr:FileUtil.convertBytesWordNotation(stats.size)}
      }
 
@@ -90,5 +91,18 @@ export class Path{
 
     public isHidden():boolean{
         return this.fileName()[0]==="."
+    }
+
+    public deleteFile():Promise<boolean>{
+       return new Promise((resolve,reject)=>{
+        try{
+            fs.unlinkSync(this.toString())
+            console.log(`successfully deleted-> ${this.toString()}`)
+            resolve(true)
+        }catch(err){
+            console.log(`failed to delete: ${this.toString()}`)
+            resolve(false)
+        }
+       })
     }
 }
