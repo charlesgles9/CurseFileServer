@@ -4,10 +4,56 @@ import Axios from 'axios'
 import BreadCrumb from './components/BreadCrumb'
 import { Navbar } from 'react-bootstrap'
 import {Buffer}  from 'buffer'
+import { HashMap } from './ds/hmap'
+
+
+function setPlaceHolderIcon(value:any):string{
+  // if server has finished loading the thumbnail return it
+  if(value.thumb!=null)
+     return value.thumb
+  // default directory object 
+  if(value.isDirectory)
+     return './folder.png'
+     // set default thumb
+    switch(value.extension.toLocaleLowerCase()){
+    case 'png':
+      return './image.png'
+    case 'jpg':
+      return './image.png'
+    case 'zip':
+      return './zip.png'
+    case 'json':
+      return './json.png'
+    case 'doc':
+    case 'docx':
+       return './word.png'
+    case 'xls':
+      return './sheet.png'   
+    case 'pdf':
+      return './pdf.png'     
+    case 'iso':
+      return './iso.png'   
+    case 'subtitle':
+      return './subtitle.png'  
+    case 'mkv':
+    case '3gp':
+    case 'webm':      
+    case 'mp4':
+      return './video.png'  
+    case 'log':
+    case 'txt':
+      return './txt.png'
+    case 'sh':
+      return './bash.png'  
+    default:
+      return './file.png'
+
+   }
+}
 
 function fileView(value:any,callback:()=>void){
   const date:Date=new Date(value.birthTime)
-  const src=value.thumb!=null?value.thumb:value.isDirectory?'./folder.png':"./file.png"
+  const src=setPlaceHolderIcon(value)
    
   return<div className='shadow p-2 rounded m-1' onClick={()=>{callback()}}>
      
@@ -35,18 +81,31 @@ function fileView(value:any,callback:()=>void){
 
 
 function App() {
-
-  const [files,setFiles]=useState([])
+  
+  const [fileTree,setFileTree]=useState<HashMap<string,any[]>>({})
   const [dir,setDir]=useState<string>("/")
   const [fdirs,setfdirs]=useState<any[]>([])
   const drawerRef=useRef<HTMLDivElement>(null) 
   const axios=Axios.create({ withCredentials:true})
+
+
+  const loadThumbnails=(data:any)=>{
+    axios.get("http://localhost:8000/thumbnail",{params:{files:data.files.map((value:any)=>{return value.path})}}).then((response)=>{
+      const files=data.files.map((f:any,i:number)=>
+       {f["thumb"]=response.data.buffers[i]!=null? `data:image/${f.extension};base64,`+
+       Buffer.from(response.data.buffers[i],"binary").toString('base64'):null; return f})
+      fileTree[data.dir]=files
+      const key=data.dir
+      setFileTree({...fileTree,key:files})
+})
+  }
   useEffect(()=>{
     // fetch all foldes in the home directory
    axios.get("http://localhost:8000/").then((response)=>{
        const data=response.data
-       setFiles(data.files)
        setDir(data.dir)
+       fileTree[data.dir]=data.files
+       setFileTree(fileTree)
        //populate the fdir with the default values
        const dvalues=["Music","Videos","Pictures","Documents","Downloads"]
        if(data.files.length>0){
@@ -54,12 +113,7 @@ function App() {
          setfdirs(values)
        }
       
-       axios.get("http://localhost:8000/thumbnail",{params:{files:data.files.map((value:any)=>{return value.path})}}).then((response)=>{
-             const files=data.files.map((f:any,i:number)=>
-              {f["thumb"]=response.data[i]!=null? 'data:image/png;base64,'+
-              Buffer.from(response.data[i],"binary").toString('base64'):null; return f})
-             setFiles(files)
-       })
+        loadThumbnails(data)
 
    })
    
@@ -67,23 +121,25 @@ function App() {
   },[])
 
   const opendir=(folder:any)=>{
+    // check if the folder has already been loaded 
+    const obj=fileTree[folder.path]
+    if(obj){
+     setDir(folder.path)
+     return 
+    }
+    // if no folder was previously loaded create a new one 
     axios.get(`http://localhost:8000/opendir/`,{params:{path:folder.path}}).then((response)=>{
       const data=response.data
-       setFiles(data.files)
-       setDir(data.dir)
-       axios.get("http://localhost:8000/thumbnail",{params:{files:data.files.map((value:any)=>{return value.path})}}).then((response)=>{
-        const files=data.files.map((f:any,i:number)=>
-        {f["thumb"]=response.data[i]!=null? 'data:image/png;base64,'+
-        Buffer.from(response.data[i],"binary").toString('base64'):null; return f})
-       setFiles(files)
-  })
+      fileTree[data.dir]=data.files
+      setFileTree(fileTree)
+      setDir(data.dir)
+      loadThumbnails(data)
 
    })
   }
   const closedir=(folder:any)=>{
     axios.get(`http://localhost:8000/closedir/`,{params:{path:folder}}).then((response)=>{
       const data=response.data
-      setFiles(data.files)
       setDir(data.dir)
   })
   }
@@ -152,7 +208,7 @@ function App() {
           <div className='col-sm-4 shadow-lg'>
          
             {
-              files.map((file,index)=>{
+              fileTree[dir]?.map((file,index)=>{
                  return <div key={index}>{fileView(file, ()=>{
                     opendir(file as any )
                  })}</div>
