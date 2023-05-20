@@ -58,7 +58,7 @@ function fileView(value:any,callback:()=>void){
   return<div className='shadow p-2 rounded m-1' onClick={()=>{callback()}}>
      
      <div className='row p-1' >
-        <img className='p-1 col-5' style={{width:"70px"}} src={src}></img>
+        <img className={`p-2 col-5 ${value.thumb?'rounded-circle':'rounded-none'}`} style={{width:"70px", height:"70px"}} src={src}></img>
         <div className='col-5'>
         <h4 className='file-name fs-5'> {value.name}</h4>
         <p className='file-path'>{value.path}</p>
@@ -83,7 +83,7 @@ function fileView(value:any,callback:()=>void){
 function App() {
   
   const [fileTree,setFileTree]=useState<HashMap<string,any[]>>({})
-  const [dir,setDir]=useState<string>("/")
+  const [dir,setDir]=useState<any>({dir:"/", parent:undefined})
   const [fdirs,setfdirs]=useState<any[]>([])
   const drawerRef=useRef<HTMLDivElement>(null) 
   const axios=Axios.create({ withCredentials:true})
@@ -91,11 +91,14 @@ function App() {
 
   const loadThumbnails=(data:any)=>{
     axios.get("http://localhost:8000/thumbnail",{params:{files:data.files.map((value:any)=>{return value.path})}}).then((response)=>{
+      //add the thumbnails into memory
       const files=data.files.map((f:any,i:number)=>
        {f["thumb"]=response.data.buffers[i]!=null? `data:image/${f.extension};base64,`+
        Buffer.from(response.data.buffers[i],"binary").toString('base64'):null; return f})
-      fileTree[data.dir]=files
+      // don't use dir directly since user can change directories even when the
+      // thumbnails loader hasn't sent a response from the server 
       const key=data.dir
+      // replace the old key 
       setFileTree({...fileTree,key:files})
 })
   }
@@ -103,7 +106,7 @@ function App() {
     // fetch all foldes in the home directory
    axios.get("http://localhost:8000/").then((response)=>{
        const data=response.data
-       setDir(data.dir)
+       setDir({dir:data.dir,parent:data.parent})
        fileTree[data.dir]=data.files
        setFileTree(fileTree)
        //populate the fdir with the default values
@@ -124,7 +127,7 @@ function App() {
     // check if the folder has already been loaded 
     const obj=fileTree[folder.path]
     if(obj){
-     setDir(folder.path)
+     setDir({dir:folder.path,parent:folder.parent})
      return 
     }
     // if no folder was previously loaded create a new one 
@@ -132,17 +135,25 @@ function App() {
       const data=response.data
       fileTree[data.dir]=data.files
       setFileTree(fileTree)
-      setDir(data.dir)
+      setDir({dir:data.dir,parent:data.parent})
       loadThumbnails(data)
 
    })
   }
   const closedir=(folder:any)=>{
-    axios.get(`http://localhost:8000/closedir/`,{params:{path:folder}}).then((response)=>{
+    console.log(folder.parent)
+    const  obj=fileTree[folder.parent]
+
+    if(obj){
+      setDir({dir:folder.parent, parent:folder.parent.substring(0,folder.parent.lastIndexOf("/"))})
+      return  
+    }
+    axios.get(`http://localhost:8000/closedir/`,{params:{path:folder.dir}}).then((response)=>{
       const data=response.data
-      setDir(data.dir)
+      setDir({dir:data.dir,parent:data.parent})
   })
   }
+
 
    const toggleDrawer=()=>{
     const element=drawerRef.current
@@ -174,7 +185,7 @@ function App() {
           <div className='d-flex'>
         <img className="col-4 m-2 " onClick={()=>{closedir(dir)}} style={{width:"40px"}} src='/back.png'></img>
         <div className='d-flex align-self-end'>
-        <BreadCrumb path={dir}/>
+        <BreadCrumb path={dir.dir}/>
         </div>
         </div>
         </div>
@@ -208,7 +219,7 @@ function App() {
           <div className='col-sm-4 shadow-lg'>
          
             {
-              fileTree[dir]?.map((file,index)=>{
+              fileTree[dir.dir]?.map((file,index)=>{
                  return <div key={index}>{fileView(file, ()=>{
                     opendir(file as any )
                  })}</div>
