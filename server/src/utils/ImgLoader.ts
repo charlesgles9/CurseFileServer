@@ -5,14 +5,22 @@ import fs from 'fs'
 
 export class ImgLoader{
 
+  static isImage(extension:string):boolean{
+     return extension.includes("png")
+     ||extension.includes("jpg")
+     ||extension.includes("jpeg")
+  }
+
+  static isVideo(extension:string):boolean{
+    return extension.includes("mp4")||
+           extension.includes("mkv")||
+           extension.includes("webm")
+  }
    static  loadImageThumbnail(files:string[]):Promise<(Buffer | null)[]>{
       const fetchThumbnail=  async (file:string)=>{
-        if(Path.getExtension(file).toLocaleLowerCase()
-        .includes("png")||
-        Path.getExtension(file).toLocaleLowerCase().includes("jpg")){
+        if(ImgLoader.isImage(Path.getExtension(file).toLocaleLowerCase())){
             return  await sharp(file).resize(200).toBuffer() 
-           }else if(Path.getExtension(file).toLocaleLowerCase().includes("mp4")||
-            Path.getExtension(file).toLocaleLowerCase().includes("mkv")){
+           }else if(ImgLoader.isVideo(Path.getExtension(file).toLocaleLowerCase())){
              return await this.extractVideoThumbnail(file)
             }else
             return null
