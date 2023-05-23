@@ -18,22 +18,38 @@ function App() {
   const [fdirs,setfdirs]=useState<any[]>([])
   const drawerRef=useRef<HTMLDivElement>(null) 
   const axios=Axios.create({ withCredentials:true})
+  const listRef=useRef<HTMLDivElement>(null)
 
-
-  const loadThumbnails=(data:any)=>{
-    axios.get("http://localhost:8000/thumbnail",{params:{files:data.files.map((value:any)=>{return value.path})}}).then((response)=>{
+  const loadThumbnails=(data:any,items:number[])=>{
+    if(data.files?.length<items.length||!data.key) return
+    // only pick visible items 
+    const filteredFiles=items.map((index)=>{return {index:index,data:data.files[index]}})
+    // make sure the selected items thumbnails are not loaded 
+    const unLoadedFiles=filteredFiles.filter(value=> value.data.thumb==null&&!value.data.isDirectory&&!value.data.pending)
+    if(unLoadedFiles.length==0)return
+   // this pending flag make's sure a thumbnail isn't loaded twice
+    unLoadedFiles.forEach((file)=>{
+      data.files[file.index].pending=true
+    })
+     //load thumbnails
+      axios.get("http://localhost:8000/thumbnail",{params:{files:unLoadedFiles.map((value:any)=>{return value.data.path})}}).then((response)=>{
       //add the thumbnails into memory
-      const files=data.files.map((f:any,i:number)=>
-       {f["thumb"]=response.data.buffers[i]!=null? `data:image/${f.extension};base64,`+
-       Buffer.from(response.data.buffers[i],"binary").toString('base64'):null; return f})
+      unLoadedFiles.map((f,i)=>
+      {f.data["thumb"]=response.data.buffers[i]!=null? `data:image/${f.data.extension};base64,`+
+      Buffer.from(response.data.buffers[i],"binary").toString('base64'):null; return f})
+      //update file list 
+      unLoadedFiles.forEach((file)=>{
+        data.files[file.index]=file.data
+      })
       // don't use dir directly since user can change directories even when the
       // thumbnails loader hasn't sent a response from the server 
       const key=data.dir
       // replace the old key 
-      setFileTree({...fileTree,key:files})
+      setFileTree({...fileTree,key:data})
 })
   }
   useEffect(()=>{
+   
     // fetch all foldes in the home directory
    axios.get("http://localhost:8000/").then((response)=>{
        const data=response.data
@@ -46,35 +62,34 @@ function App() {
          const values=dvalues.map((value)=>{return {path:`${data.dir}/${value}`,name:value }})
          setfdirs(values)
        }
-      
-        loadThumbnails(data)
-
    })
    
 
   },[])
 
   const opendir=(folder:any)=>{
+   
     // check if the folder has already been loaded 
     const obj=fileTree[folder.path]
     if(obj){
      setDir({dir:folder.path,parent:folder.parent})
+     // scroll to top
+     listRef.current?.scrollTo(0,0)
      return 
     }
+    
     // if no folder was previously loaded create a new one 
     axios.get(`http://localhost:8000/opendir/`,{params:{path:folder.path}}).then((response)=>{
+       // scroll to top
+       listRef.current?.scrollTo(0,0)
       const data=response.data
       fileTree[data.dir]=data.files
       setFileTree(fileTree)
       setDir({dir:data.dir,parent:data.parent})
-      loadThumbnails(data)
-
    })
   }
   const closedir=(folder:any)=>{
-    console.log(folder.parent)
     const  obj=fileTree[folder.parent]
-
     if(obj){
       setDir({dir:folder.parent, parent:folder.parent.substring(0,folder.parent.lastIndexOf("/"))})
       return  
@@ -148,11 +163,12 @@ function App() {
 
           <div className='col-sm-4 shadow-lg'>
           
-            
-          <ListView files={fileTree[dir.dir]} callback={(file:any):void=>{opendir(file)}} 
-          onScoll={(indices:number[])=>{
-
+            {
+          <ListView listRef={listRef}files={fileTree[dir.dir]} id={dir.dir} callback={(file:any):void=>{opendir(file)}} 
+          onScoll={(files:any,id:any,indices:number[])=>{
+               loadThumbnails({files:files,key:id},indices)
           }}/>
+        }
           
             
          </div>

@@ -74,36 +74,42 @@ function setPlaceHolderIcon(value:any):string{
   }
 
   type ListProps={
+    listRef:any,
     files:any,
+    id:any
     callback:(file:any)=>void,
-    onScoll:(itemIndices:number[])=>void
+    onScoll:(files:[],key:any,itemIndices:number[])=>void
   }
 
-function ListView({files,callback, onScoll}:ListProps){
-        
-    const elementRef=useRef<HTMLDivElement>(null)
- 
+function ListView({listRef,files,id,callback, onScoll}:ListProps){
     const itemVisibilityCheck=()=>{
-      if(!elementRef.current){
-         onScoll([])
+      if(!listRef.current){
+         onScoll(files,id,[])
          return 
       }
-      const items=[]
-      Array.from(elementRef.current.children).forEach((item,index)=>{
+      const items:number[]=[]
+      
+      Array.from(listRef.current.children).forEach((item,index)=>{
        if(isElementVisible(item as HTMLElement)){
+        if(index<files.length)
           items.push(index)
        }
       })
+
+      onScoll(files,id,items)
     }
+
     const handleOnScroll=(event:React.UIEvent<HTMLElement>)=>{
+      
       itemVisibilityCheck()
+    
     }
 
-  
-    if(elementRef.current)
-       itemVisibilityCheck()
 
-    return <div ref={elementRef} id="listView" style={{ height:'85vh',overflowY:'scroll'} } onScroll={handleOnScroll} >
+    if(listRef.current&&files)
+    itemVisibilityCheck()
+    
+    return <div ref={listRef} id="listView" style={{ height:'85vh',overflowY:'scroll'} } onScroll={handleOnScroll} >
          {
              (files as [])?.map((file,index)=>{
                  return <div  key={index}>{fileView(file, ()=>{
