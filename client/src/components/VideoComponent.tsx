@@ -16,29 +16,13 @@ function VideoComponent({show,path,playing,callback,closePlayer}:DialogOptions){
     const [videoUrl,setvideoUrl]=useState<string>("")
    useEffect(()=>{
      if(!playing){
-     console.log("Video sideEffect Called!")
+  
      callback(true)
-    /* if(vpRef.current!=null){
-        console.log(path)
-        document.ge
-     vpRef.current.src=`http://localhost:8000/video?path=${path}`
-       vpRef.current.play()
-     }*/
+   
    if(container===null) return 
    
    setvideoUrl(`http://localhost:8000/video?path=${path}`)
    
-     console.log(container)
-     /*axios.get("http://localhost:8000/video",{responseType:'blob',params:{path:path}})
-     .then(response=>{
-       
-      const blobData=new Blob([response.data], {type:'video/mp4'})
-      const videoUrl=URL.createObjectURL(blobData)
-      if(vpRef.current!=null)
-      vpRef.current.src=videoUrl  
-     }).catch(err=>{
-      console.log(err)
-  })*/
      }
    },[show])
    

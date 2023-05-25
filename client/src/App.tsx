@@ -99,6 +99,7 @@ function App() {
         setShowVideoView({show:true,path:file.path,playing:false})
         break
       case 'mkv':
+        setShowVideoView({show:true,path:file.path,playing:false})
         break
       case 'webm':
         break
@@ -198,7 +199,7 @@ function App() {
               openFile(file)
           }} 
           onScoll={(files:any,id:any,indices:number[])=>{
-             //  loadThumbnails({files:files,key:id},indices)
+              loadThumbnails({files:files,key:id},indices)
           }}/>
         }
           

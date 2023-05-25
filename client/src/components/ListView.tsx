@@ -105,9 +105,10 @@ function ListView({listRef,files,id,callback, onScoll}:ListProps){
     
     }
 
-
-    if(listRef.current&&files)
-    itemVisibilityCheck()
+    useEffect(()=>{
+      itemVisibilityCheck()
+    },[files])
+   
     
     return <div ref={listRef} id="listView" style={{ height:'85vh',overflowY:'scroll'} } onScroll={handleOnScroll} >
          {
