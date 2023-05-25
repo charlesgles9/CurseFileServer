@@ -31,7 +31,6 @@
 }
 
 .App{
-  
   display: block;
   flex-direction: row;
   width:calc(100%-100px);
@@ -165,6 +164,21 @@
 }
 
 .drawer-item:hover{
-  background-color: rgba(5, 5, 5, 0.308) !important;
+  background-color: rgba(145, 95, 95, 0.308) !important;
 }
+
+
+.dialog-container{
+  position: relative;
+
+}
+
+.dialog-content{
+  position: fixed;
+  left: 0px;
+  top: 80px;
+  height: 90vh;
+  width: 100vw;
+}
+
 

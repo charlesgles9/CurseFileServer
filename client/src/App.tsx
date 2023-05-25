@@ -2,13 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import Axios from 'axios'
 import BreadCrumb from './components/BreadCrumb'
-import { Navbar } from 'react-bootstrap'
 import {Buffer}  from 'buffer'
 import { HashMap } from './ds/hmap'
 import ListView from './components/ListView'
-
-
-
+import VideoComponent from './components/VideoComponent'
 
 
 function App() {
@@ -19,7 +16,7 @@ function App() {
   const drawerRef=useRef<HTMLDivElement>(null) 
   const axios=Axios.create({ withCredentials:true})
   const listRef=useRef<HTMLDivElement>(null)
-
+  const [showVideoView,setShowVideoView]=useState({show:false,path:"/",playing:false})
   const loadThumbnails=(data:any,items:number[])=>{
     if(data.files?.length<items.length||!data.key) return
     // only pick visible items 
@@ -39,15 +36,18 @@ function App() {
       Buffer.from(response.data.buffers[i],"binary").toString('base64'):null; return f})
       //update file list 
       unLoadedFiles.forEach((file)=>{
+        file.data.pending=false
         data.files[file.index]=file.data
       })
-      // don't use dir directly since user can change directories even when the
+      // don't use 'dir' directly since user can change directories even when the
       // thumbnails loader hasn't sent a response from the server 
+      // instead reference it from the data object
       const key=data.dir
-      // replace the old key 
+      // replace the old key and update the list 
       setFileTree({...fileTree,key:data})
 })
   }
+
   useEffect(()=>{
    
     // fetch all foldes in the home directory
@@ -68,7 +68,7 @@ function App() {
   },[])
 
   const opendir=(folder:any)=>{
-   
+  
     // check if the folder has already been loaded 
     const obj=fileTree[folder.path]
     if(obj){
@@ -79,7 +79,7 @@ function App() {
     }
     
     // if no folder was previously loaded create a new one 
-    axios.get(`http://localhost:8000/opendir/`,{params:{path:folder.path}}).then((response)=>{
+    axios.get(`http://localhost:8000/opendir/`,{params:{path:folder.path} }).then((response)=>{
        // scroll to top
        listRef.current?.scrollTo(0,0)
       const data=response.data
@@ -88,6 +88,25 @@ function App() {
       setDir({dir:data.dir,parent:data.parent})
    })
   }
+
+
+  const openFile=(file:any)=>{
+
+    console.log("called!")
+     switch(file.extension){
+
+      case 'mp4':
+        setShowVideoView({show:true,path:file.path,playing:false})
+        break
+      case 'mkv':
+        break
+      case 'webm':
+        break
+
+     }
+  }
+
+   
   const closedir=(folder:any)=>{
     const  obj=fileTree[folder.parent]
     if(obj){
@@ -100,6 +119,8 @@ function App() {
   })
   }
 
+
+  console.log("Rerender")
 
    const toggleDrawer=()=>{
     const element=drawerRef.current
@@ -114,8 +135,13 @@ function App() {
    }
   
   return (
-    
+    <>
+ 
     <div className="App">
+    <VideoComponent  show={showVideoView.show} path={showVideoView.path} playing={showVideoView.playing}
+     callback={(playing)=>{
+       setShowVideoView({...showVideoView,playing:playing})
+    } } closePlayer={()=>{setShowVideoView({show:false,playing:false,path:'/'})}}/>
       <nav className="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
       <div className="container-fluid  ">
       <div className='d-flex'>
@@ -164,9 +190,15 @@ function App() {
           <div className='col-sm-4 shadow-lg'>
           
             {
-          <ListView listRef={listRef}files={fileTree[dir.dir]} id={dir.dir} callback={(file:any):void=>{opendir(file)}} 
+          <ListView listRef={listRef}files={fileTree[dir.dir]} id={dir.dir} 
+          callback={(file:any):void=>{
+            if(file.isDirectory) 
+               opendir(file) 
+            else 
+              openFile(file)
+          }} 
           onScoll={(files:any,id:any,indices:number[])=>{
-               loadThumbnails({files:files,key:id},indices)
+             //  loadThumbnails({files:files,key:id},indices)
           }}/>
         }
           
@@ -175,7 +207,8 @@ function App() {
          </div>
          </div>
     </div>
-  )
+   
+    </>)
 }
 
 export default App
