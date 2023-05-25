@@ -125,7 +125,7 @@ app.get("/video", (req,res)=>{
         'Accept-Ranges':'bytes',
         //prevent overflow 
         'Content-Length':Math.min(FileUtil.SIZE_MB,chunkSize),
-        'Content-Type':'video/mp4'
+        'Content-Type':`video/${file.extension()}`
       }
       res.writeHead(206,headers)
       const fileStream= Path.createReadStreamRanged(path.toString(),{start:startBytes,end:startBytes+FileUtil.SIZE_MB})
@@ -136,7 +136,7 @@ app.get("/video", (req,res)=>{
         'Content-Range':`bytes ${0}-${size}/${size}`,
         'Accept-Ranges':'bytes',
         'Content-Length':size,
-        'Content-Type':'video/mp4'
+        'Content-Type':`video/${file.extension()}`
       })
 
       const fileStream= Path.createReadStreamRanged(path.toString(),{start:0,end:size})
