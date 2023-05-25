@@ -103,6 +103,50 @@ app.get("/thumbnail", (req,res)=>{
     })
 })
 
+
+app.get("/video", (req,res)=>{
+  const{path}=req.query
+   if(path!=null){
+    const file=new Path(path.toString())
+    //ignore folders to prevent server crashes 
+    if(file.isFolder()) return 
+    const size= file.size()
+    const range=req.headers.range
+    if(range){
+      const [start,end]=range.replace('bytes=','').trim().split('-')
+      //offset from the start of the file
+      const startBytes=parseInt(start,10)
+      //the total target size 
+      const endBytes=end!==''?parseInt(end,10):size-1
+      //chunk remaining to load 
+      const chunkSize=endBytes-startBytes+1
+      const headers={
+        'Content-Range':`bytes ${startBytes}-${endBytes}/${size}`,
+        'Accept-Ranges':'bytes',
+        //prevent overflow 
+        'Content-Length':Math.min(FileUtil.SIZE_MB,chunkSize),
+        'Content-Type':'video/mp4'
+      }
+      res.writeHead(206,headers)
+      const fileStream= Path.createReadStreamRanged(path.toString(),{start:startBytes,end:startBytes+FileUtil.SIZE_MB})
+      fileStream.pipe(res)
+    }else{
+  
+      res.writeHead(206,{
+        'Content-Range':`bytes ${0}-${size}/${size}`,
+        'Accept-Ranges':'bytes',
+        'Content-Length':size,
+        'Content-Type':'video/mp4'
+      })
+
+      const fileStream= Path.createReadStreamRanged(path.toString(),{start:0,end:size})
+      fileStream.pipe(res)
+     }
+   }
+
+})
+
+
 app.listen(PORT,():void=>{
     console.log("Server started!")
 })

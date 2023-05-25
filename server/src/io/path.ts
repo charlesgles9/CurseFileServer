@@ -63,6 +63,7 @@ export class Path{
         return stats.size
     }
 
+   
     public getStats():fs.Stats{
         
         return statSync(this.toString())
@@ -105,4 +106,11 @@ export class Path{
         }
        })
     }
+
+    public static createReadStreamRanged(path:string,range:any):fs.ReadStream{
+     return fs.createReadStream(path,range)
+    }
+    public static createReadStream(path:string):fs.ReadStream{
+        return fs.createReadStream(path)
+       }
 }
