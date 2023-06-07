@@ -45,6 +45,14 @@ export class Path{
         })
     }
 
+     public static existsSync(path:string):boolean{
+        try {
+         fs.accessSync(path)
+         return true
+        }catch(err){
+          return false
+        }
+     }
     public toString():string{
         return this.path.toString()
     }
@@ -107,9 +115,17 @@ export class Path{
        })
     }
 
+
+    public static createFolder(folder:string):string|undefined{
+        if(!fs.existsSync(folder)) return folder
+       return fs.mkdirSync(folder,{recursive:true})
+    }
+
     public static createReadStreamRanged(path:string,range:any):fs.ReadStream{
      return fs.createReadStream(path,range)
     }
+
+
     public static createReadStream(path:string):fs.ReadStream{
         return fs.createReadStream(path)
        }

@@ -20,6 +20,12 @@ export class Queue<T>{
         return this.data.shift()
      }
 
+     public remove(item:T):boolean{
+      const index=this.data.indexOf(item)
+        this.data.slice(index,1)
+        return index!=-1
+     }
+     
      public isEmpty():boolean{
         return this.data.length==0
      }
