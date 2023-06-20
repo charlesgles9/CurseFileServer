@@ -82,24 +82,25 @@ function setPlaceHolderIcon(value:any):string{
   }
 
 function ListView({listRef,files,id,callback, onScoll}:ListProps){
+ 
     const itemVisibilityCheck=()=>{
       if(!listRef.current){
          onScoll(files,id,[])
          return 
       }
       const items:number[]=[]
-      
+     // console.log(files)
       Array.from(listRef.current.children).forEach((item,index)=>{
        if(isElementVisible(item as HTMLElement)){
         if(index<files.length)
           items.push(index)
        }
       })
-
+    
       onScoll(files,id,items)
     }
 
-    const handleOnScroll=(event:React.UIEvent<HTMLElement>)=>{
+    const handleOnScroll=(event:Event)=>{
       
       itemVisibilityCheck()
     
@@ -107,10 +108,21 @@ function ListView({listRef,files,id,callback, onScoll}:ListProps){
 
     useEffect(()=>{
       itemVisibilityCheck()
+      const listener=(event:Event)=>{
+      
+        handleOnScroll(event)
+        
+    }
+    document.addEventListener('scroll',listener)
+    return ()=>{
+      document.removeEventListener('scroll',listener)
+     
+    }
     },[files])
    
+
     
-    return <div ref={listRef} id="listView" style={{ height:'85vh',overflowY:'scroll'} } onScroll={handleOnScroll} >
+    return <div ref={listRef} id="listView" style={{ overflowY:'scroll'} }  >
          {
              (files as [])?.map((file,index)=>{
                  return <div  key={index}>{fileView(file, ()=>{

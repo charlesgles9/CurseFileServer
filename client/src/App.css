@@ -1,6 +1,7 @@
 :root{
   --primary:#57839c;
   --secondary:black;
+  --darkControlBg:#00000060;
 }
 .logo {
   height: 6em;
@@ -179,6 +180,32 @@
   top: 80px;
   height: 90vh;
   width: 100vw;
+}
+
+.videoQualityOptions{
+  opacity: 0;
+}
+
+.videoQualityOptions:hover{
+  opacity: 1;
+}
+
+.video-container{
+  position: relative;
+  top: 0px;
+  left: 0px;
+}
+
+.video-ui{
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+.video-controls{
+  position: fixed;
+  background-color: rgba(27, 27, 27, 0.596);
+  left: 0px; 
 }
 
 
