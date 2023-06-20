@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 import { statSync } from 'fs';
 import { FileUtil } from '../utils/fileutil';
+import { resolve } from 'path';
 export class Path{
 
     private path:String
@@ -114,7 +115,40 @@ export class Path{
         }
        })
     }
+    public deleteFileSync():boolean{
+      try{
+        fs.unlinkSync(this.toString())
+        console.log(`successfully deleted-> ${this.toString()}`)
+        return true
+      }catch(err){
+        console.log(`failed to delete: ${this.toString()}`)
+        return false
+      }
+    }
 
+    public static deleteFolderItemsRecursive(folderPath:string):Promise<void> {
+         return new Promise<void>((resolve, reject)=>{
+            if (fs.existsSync(folderPath)) {
+                //if it's a file exit 
+                if(new Path(folderPath).isFile())
+                      return  reject()
+                  fs.readdirSync(folderPath).forEach((file) => {
+                    const curPath = new Path(folderPath).join(file).toString()
+              
+                    if (fs.lstatSync(curPath).isDirectory()) {
+                      this.deleteFolderItemsRecursive(curPath)
+                    } else {
+                      fs.unlinkSync(curPath)
+                      console.log('File deleted:', curPath)
+                    }
+                  })
+              
+                  console.log('Folder Items Deleted:', folderPath)
+                  resolve()
+                }
+         })
+       
+      }
 
     public static createFolder(folder:string):string|undefined{
         if(!fs.existsSync(folder)) return folder

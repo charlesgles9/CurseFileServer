@@ -11,6 +11,12 @@ export class Queue<T>{
         
     }
 
+
+
+    private set(items:T[]){
+       this.data=items
+    }
+
      public enqueue(item:T){
         if(this.pool>this.size())
            this.data.push(item)
@@ -21,8 +27,8 @@ export class Queue<T>{
      }
 
      public remove(item:T):boolean{
-      const index=this.data.indexOf(item)
-        this.data.slice(index,1)
+      const index=this.data.indexOf(item)+1
+        this.set(this.data.splice(index))
         return index!=-1
      }
      
@@ -36,5 +42,9 @@ export class Queue<T>{
 
      public peek(): T| undefined{
         return this.data[0]
+     }
+
+     public clear(){
+       return this.data.splice(0,this.data.length)
      }
 }
