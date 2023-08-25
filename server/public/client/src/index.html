@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Main Page</title>
+    <link href="http://localhost:8000/dist/main.css" rel="stylesheet" />
+    <script src="http://localhost:8000/dist/jquery-3.7.0.min.js"></script>
+  </head>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+  </style>
+  <body class="bg-gray-900">
+    <div class="container-xl flex flex-col">
+      <div class="container flex flex-col self-center">
+        <ul
+          class="container max-w-md divide-y divide-gray-200 self-center dark:divide-gray-700 border"
+          id="fileList"
+        ></ul>
+      </div>
+    </div>
+
+    <script>
+      function injectListItemContent(file) {
+        var liElement = $("<li>")
+          .addClass("pb-3 sm:pb-4 max-w-md")
+          .click(() => {
+            if (file.isDirectory) {
+              const url =
+                "http://localhost:8000/opendir/?" +
+                new URLSearchParams({
+                  path: file.path,
+                });
+              fetchDirData(url);
+            }
+          });
+        var innerDiv = $("<div>").addClass("flex items-center space-x-4");
+        var imageDiv = $("<div>").addClass("flex-shrink-0");
+        var image = $("<img>")
+          .addClass("lg:w-16 lg:h-16 w-32 h-32 rounded-full")
+          .attr(
+            "src",
+            file.isDirectory
+              ? "http://localhost:8000/icons/folder.png"
+              : "http://localhost:8000/icons/file.png"
+          )
+          .attr("alt", "Neil image");
+        var textDiv = $("<div>").addClass("flex-1 min-w-0");
+        var name = $("<p>")
+          .addClass(
+            "text-sm font-medium text-gray-900 truncate dark:text-white"
+          )
+          .text(file.name);
+        var path = $("<p>")
+          .addClass("text-sm text-gray-500 truncate dark:text-gray-400")
+          .text(file.path);
+        var date = $("<p>")
+          .addClass("text-sm text-gray-500 truncate dark:text-gray-400")
+          .text(new Date(file.birthTime).toDateString());
+        var fileSizeDiv = $("<div>")
+          .addClass(
+            "inline-flex flex-col  text-base font-semibold text-gray-900 dark:text-white"
+          )
+          .text(file.isDirectory ? "" : file.sizeStr);
+
+        imageDiv.append(image);
+        textDiv.append(name, path);
+        fileSizeDiv.append(date);
+        innerDiv.append(imageDiv, textDiv, fileSizeDiv);
+        liElement.append(innerDiv);
+
+        return liElement;
+      }
+
+      function fetchDirData(url) {
+        fetch(url)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Data received:", data);
+            $(document).ready(function () {
+              $("#fileList").empty();
+              data.files.forEach((file) => {
+                $("#fileList").append(injectListItemContent(file));
+              });
+            });
+          })
+          .catch((error) => {
+            console.error("Fetch error:", error);
+          });
+      }
+
+      function fetchFileData(url) {
+        fetch(url)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Data received:", data);
+            $(document).ready(function () {
+              $("#fileList").empty();
+              data.files.forEach((file) => {
+                $("#fileList").append(injectListItemContent(file));
+              });
+            });
+          })
+          .catch((error) => {
+            console.error("Fetch error:", error);
+          });
+      }
+
+      fetchFileData("http://localhost:8000/");
+    </script>
+  </body>
+</html>
