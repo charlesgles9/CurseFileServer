@@ -3,7 +3,6 @@ import { Path } from '../io/path'
 import ffmpeg from 'fluent-ffmpeg'
 import {ChildProcess, spawn} from 'child_process'
 import { Queue } from '../ds/queue'
-import { FileUtil } from '../utils/fileutil'
 import { resolve } from 'path'
 import os from 'os'
 const router = express.Router()
@@ -70,7 +69,7 @@ router.get("/video", (req,res)=>{
             '-c:v', 'libx264',
             '-preset', 'ultrafast',
             '-g','60',
-           // '-b:v', '1000k',
+            '-b:v', '1500k',
             '-c:a', 'aac',
             '-b:a', '128k',
             '-f', 'segment',
@@ -116,10 +115,8 @@ router.get("/video", (req,res)=>{
           })
 
           ffmpeg.on('exit', (code, signal) => {
-           // if (!ffmpeg.killed) ffmpeg.kill()
-            
             if(jobItem){
-            console.log(`ffmpeg process exited with code ${code} and signal ${signal} jobQueue `+hlsStreamJobQueue.size());
+             console.log(`ffmpeg process exited with code ${code} and signal ${signal} jobQueue `+hlsStreamJobQueue.size());
             //delete previous segments and stream file
              deleteStreamSegments(jobItem.streamFile,jobItem.segWildcard)
             }

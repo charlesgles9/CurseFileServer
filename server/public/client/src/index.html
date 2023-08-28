@@ -12,35 +12,61 @@
       min-width: 320px;
       min-height: 100vh;
       box-sizing: border-box;
+      overflow: auto;
     }
   </style>
   <body class="bg-gray-900">
     <div class="container-xl flex flex-col">
-      <div class="container flex flex-col self-center">
+      <div
+        class="container flex flex-col self-center"
+        style="position: relative"
+      >
+        <div
+          class="max-w-md self-center flex container bg-gray-900"
+          style="position: fixed; top: 0"
+        >
+          <button class="w-16 h-16" id="previousDir">
+            <svg
+              class="w-6 h-6 text-gray-800 dark:text-white"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 19 17"
+            >
+              <g transform="scale(-1, 1) translate(-19, 0)">
+                <path
+                  d="M2.057 6.9a8.718 8.718 0 0 1 6.41-3.62v-1.2A2.064 2.064 0 0 1 9.626.2a1.979 1.979 0 0 1 2.1.23l5.481 4.308a2.107 2.107 0 0 1 0 3.3l-5.479 4.308a1.977 1.977 0 0 1-2.1.228 2.063 2.063 0 0 1-1.158-1.876v-.942c-5.32 1.284-6.2 5.25-6.238 5.44a1 1 0 0 1-.921.807h-.06a1 1 0 0 1-.953-.7A10.24 10.24 0 0 1 2.057 6.9Z"
+                />
+              </g>
+            </svg>
+          </button>
+        </div>
+        <span class="h-16"></span>
         <ul
-          class="container max-w-md divide-y divide-gray-200 self-center dark:divide-gray-700 border"
+          class="container max-w-md divide-y divide-gray-200 self-center dark:divide-gray-700"
           id="fileList"
         ></ul>
       </div>
     </div>
 
     <script>
+      const tree = [];
       function injectListItemContent(file) {
         var liElement = $("<li>")
-          .addClass("pb-3 sm:pb-4 max-w-md")
+          .addClass("pb-3 sm:pb-4 max-w-md pl-2 pr-2")
           .click(() => {
             if (file.isDirectory) {
-              const url =
-                "http://localhost:8000/opendir/?" +
-                new URLSearchParams({
-                  path: file.path,
-                });
-              fetchDirData(url);
+              // push this directory to our stack
+              tree.push({
+                parent: file.parent,
+                scrollTop: $(document).scrollTop(),
+              });
+              nextDir(file.path);
             }
           });
         var innerDiv = $("<div>").addClass("flex items-center space-x-4");
         var imageDiv = $("<div>").addClass("flex-shrink-0");
-        var image = $("<img>")
+        var image = $(`<img  id='${file.index}'>`)
           .addClass("lg:w-16 lg:h-16 w-32 h-32 rounded-full")
           .attr(
             "src",
@@ -49,6 +75,7 @@
               : "http://localhost:8000/icons/file.png"
           )
           .attr("alt", "Neil image");
+
         var textDiv = $("<div>").addClass("flex-1 min-w-0");
         var name = $("<p>")
           .addClass(
@@ -76,7 +103,27 @@
         return liElement;
       }
 
-      function fetchDirData(url) {
+      function previousDir(dir) {
+        const url =
+          "http://localhost:8000/opendir/?" +
+          new URLSearchParams({
+            path: dir.parent,
+          });
+        fetchDirData(url).then(() => {});
+      }
+
+      function nextDir(path) {
+        const url =
+          "http://localhost:8000/opendir/?" +
+          new URLSearchParams({
+            path: path,
+          });
+
+        fetchDirData(url);
+        $(document).scrollTop(0);
+      }
+
+      async function fetchDirData(url) {
         fetch(url)
           .then((response) => {
             if (!response.ok) {
@@ -88,9 +135,12 @@
             console.log("Data received:", data);
             $(document).ready(function () {
               $("#fileList").empty();
-              data.files.forEach((file) => {
+              data.files.forEach((file, index) => {
+                file.index = index;
                 $("#fileList").append(injectListItemContent(file));
               });
+              loadThumbnails(data.files);
+              return Promise.resolve();
             });
           })
           .catch((error) => {
@@ -98,6 +148,36 @@
           });
       }
 
+      function loadThumbnails(files) {
+        const data = files.map((file) => file.path);
+        fetch("http://localhost:8000/thumbnail", {
+          method: "POST",
+          body: JSON.stringify({ files: data }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log(data.buffers);
+            files.forEach((file, index) => {
+              if (data.buffers[index]) {
+                $(`#${file.index}`).attr(
+                  "src",
+                  "data:image/jpeg;base64, " + toBase64(data.buffers[index])
+                );
+              }
+            });
+          })
+          .catch((error) => {
+            console.error("Fetch error:", error);
+          });
+      }
       function fetchFileData(url) {
         fetch(url)
           .then((response) => {
@@ -110,7 +190,11 @@
             console.log("Data received:", data);
             $(document).ready(function () {
               $("#fileList").empty();
-              data.files.forEach((file) => {
+              //remove previous directories
+              tree.splice(0, tree.length);
+              tree.push(data.dir);
+              data.files.forEach((file, index) => {
+                file.index = index;
                 $("#fileList").append(injectListItemContent(file));
               });
             });
@@ -119,8 +203,24 @@
             console.error("Fetch error:", error);
           });
       }
-
+      $(document).ready(function () {
+        $("#previousDir").click(() => {
+          if (tree.length > 1) {
+            const dir = tree.pop();
+            previousDir(dir);
+          }
+        });
+      });
       fetchFileData("http://localhost:8000/");
+      function toBase64(buffer) {
+        if (buffer.type === "ArrayBuffer") arr = new Uint8Array(arr);
+        return btoa(
+          buffer.data.reduce(
+            (data, byte) => data + String.fromCharCode(byte),
+            ""
+          )
+        );
+      }
     </script>
   </body>
 </html>
