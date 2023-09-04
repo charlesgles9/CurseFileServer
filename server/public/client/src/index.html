@@ -65,14 +65,14 @@
             }
           });
         var innerDiv = $("<div>").addClass("flex items-center space-x-4");
-        var imageDiv = $("<div>").addClass("flex-shrink-0");
-        var image = $(`<img  id='${file.index}'>`)
+        var imageDiv = $("<div>").addClass("flex-shrink-0 ");
+        var image = $(`<img  id='${file.id}'>`)
           .addClass("lg:w-16 lg:h-16 w-32 h-32 rounded-full")
           .attr(
             "src",
             file.isDirectory
               ? "http://localhost:8000/icons/folder.png"
-              : "http://localhost:8000/icons/file.png"
+              : thumbnailPlaceholder(file)
           )
           .attr("alt", "Neil image");
 
@@ -132,14 +132,15 @@
             return response.json();
           })
           .then((data) => {
-            console.log("Data received:", data);
             $(document).ready(function () {
               $("#fileList").empty();
               data.files.forEach((file, index) => {
                 file.index = index;
+                file.id = generateId();
                 $("#fileList").append(injectListItemContent(file));
               });
               loadThumbnails(data.files);
+
               return Promise.resolve();
             });
           })
@@ -148,6 +149,52 @@
           });
       }
 
+      function ListView(layoutId) {
+        this.layoutId = layoutId;
+      }
+
+      ListView.prototype = {
+        setItems: function (items) {
+          this.items = items;
+        },
+
+        display: function () {
+          $(document).ready(function () {
+            $(`#${this.layoutId}`).empty();
+            this.items.forEach((item, index) => {
+              item.index = index;
+              item.id = generateId();
+              $(`#${this.layoutId}`).append(injectListItemContent(item));
+            });
+          });
+        },
+
+        visibleItems: function (sx, sy) {},
+      };
+
+      function thumbnailPlaceholder(file) {
+        switch (file.extension) {
+          case "png":
+          case "jpg":
+          case "jpeg":
+            return "http://localhost:8000/icons/image.png";
+          case "mp4":
+          case "mkv":
+            return "http://localhost:8000/icons/video.png";
+          case "json":
+            return "http://localhost:8000/icons/json.png";
+          case "txt":
+          case "csv":
+          case "log":
+            return "http://localhost:8000/icons/txt.png";
+          case "zip":
+            return "http://localhost:8000/icons/zip.png";
+          case "iso":
+            return "http://localhost:8000/icons/iso.png";
+          default:
+            return "http://localhost:8000/icons/file.png";
+        }
+      }
       function loadThumbnails(files) {
         const data = files.map((file) => file.path);
         fetch("http://localhost:8000/thumbnail", {
@@ -164,10 +211,9 @@
             return response.json();
           })
           .then((data) => {
-            console.log(data.buffers);
             files.forEach((file, index) => {
               if (data.buffers[index]) {
-                $(`#${file.index}`).attr(
+                $(`#${file.id}`).attr(
                   "src",
                   "data:image/jpeg;base64, " + toBase64(data.buffers[index])
                 );
@@ -187,7 +233,6 @@
             return response.json();
           })
           .then((data) => {
-            console.log("Data received:", data);
             $(document).ready(function () {
               $("#fileList").empty();
               //remove previous directories
@@ -195,8 +240,11 @@
               tree.push(data.dir);
               data.files.forEach((file, index) => {
                 file.index = index;
+                file.id = generateId();
                 $("#fileList").append(injectListItemContent(file));
               });
+
+              loadThumbnails(data.files);
             });
           })
           .catch((error) => {
@@ -220,6 +268,20 @@
             ""
           )
         );
+      }
+
+      $.fn.isInViewport = function () {
+        var elementTop = $(this).offset().top;
+        var elementBottom = elementTop + $(this).outerHeight();
+
+        var viewportTop = $(window).scrollTop();
+        var viewportBottom = viewportTop + $(window).height();
+
+        return elementBottom > viewportTop && elementTop < viewportBottom;
+      };
+
+      function generateId() {
+        return `id_${(Math.random(8) + 1).toString().substr(2, 7)}`;
       }
     </script>
   </body>

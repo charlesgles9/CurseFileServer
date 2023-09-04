@@ -30,6 +30,11 @@ app.get("/home", (req, res) => {
     new Path(clientUIPath.toString()).join("src", "index.html").toString()
   );
 });
+app.get("/player", (req, res) => {
+  res.sendFile(
+    new Path(clientUIPath.toString()).join("src", "player.html").toString()
+  );
+});
 app.listen(PORT, (): void => {
   console.log("Server started!");
 });

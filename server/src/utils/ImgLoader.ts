@@ -19,6 +19,7 @@ export class ImgLoader {
       extension.includes("webm")
     );
   }
+
   static loadImageThumbnail(files: string[]): Promise<(Buffer | null)[]> {
     const fetchThumbnail = async (file: string) => {
       if (ImgLoader.isImage(Path.getExtension(file).toLocaleLowerCase())) {

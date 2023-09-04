@@ -14,6 +14,7 @@
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "flowbite": "^1.8.1",
     "fluent-ffmpeg": "^2.1.2",
     "hls-server": "^1.5.0",
     "nodemon": "^2.0.22",

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Player</title>
+    <link href="http://localhost:8000/dist/main.css" rel="stylesheet" />
+    <script src="http://localhost:8000/dist/jquery-3.7.0.min.js"></script>
+    <link href="//vjs.zencdn.net/8.3.0/video-js.min.css" rel="stylesheet" />
+    <script src="//vjs.zencdn.net/8.3.0/video.min.js"></script>
+  </head>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      box-sizing: border-box;
+      overflow: auto;
+    }
+  </style>
+  <body class="bg-gray-900">
+    <div class="container-xl flex flex-col">
+      <span class="h-16"></span>
+      <div class="flex flex-row  self-center">
+        <div id="video_quality_container" class="block pr-2">
+          <div
+            class="flex items-center pl-4 rounded dark:border-gray-700"
+          >
+            <input
+              id="bordered-radio-1"
+              type="radio"
+              value=""
+              name="bordered-radio"
+              class="w-8 h-8 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            />
+            <label
+              for="bordered-radio-1"
+              class="w-full py-4 ml-2 text-sm font-medium text-gray-500 dark:text-gray-500"
+              >1080p</label
+            >
+          </div>
+          <div
+            class="flex items-center pl-4 rounded "
+          >
+            <input
+              checked
+              id="bordered-radio-2"
+              type="radio"
+              value=""
+              name="bordered-radio"
+              class="w-8 h-8 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            />
+            <label
+              for="bordered-radio-2"
+              class="w-full py-4 ml-2 text-sm font-medium text-gray-500 dark:text-gray-500"
+              >720p</label
+            >
+          </div>
+        </div>
+        <video
+          id="my-player"
+          class="video-js self-center container-lg"
+          controls
+          preload="auto"
+        >
+        <source src="//vjs.zencdn.net/v/oceans.mp4" type="video/mp4"></source>
+        <source src="//vjs.zencdn.net/v/oceans.webm" type="video/webm"></source>
+        <source src="//vjs.zencdn.net/v/oceans.ogv" type="video/ogg"></source> 
+        </video>
+      </div>
+    </div>
+  </body>
+  <script>
+    var player = videojs("my-player");
+  </script>
+</html>
