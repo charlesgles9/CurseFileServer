@@ -2,8 +2,10 @@ import sharp from "sharp";
 import { Path } from "../io/path";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
-
+import os, { type } from "os";
+import Hash from "./hash";
 export class ImgLoader {
+  private static secret: string = "curse_thumbnail";
   static isImage(extension: string): boolean {
     return (
       extension.includes("png") ||
@@ -23,6 +25,28 @@ export class ImgLoader {
   static loadImageThumbnail(files: string[]): Promise<(Buffer | null)[]> {
     const fetchThumbnail = async (file: string) => {
       if (ImgLoader.isImage(Path.getExtension(file).toLocaleLowerCase())) {
+        const targetPath = new Path(os.homedir())
+          .join("CurseFileServer", ".thumbnails")
+          .toString();
+        const outPath = Path.createFolder(targetPath);
+        if (outPath) {
+          const hashValue = Hash(ImgLoader.secret, file);
+          // use the hashed value as the filename
+          const filePath = new Path(`${outPath}`).join(
+            hashValue.toString() + ".jpg"
+          );
+          // if the file is already cached then return the cached file
+          if (Path.existsSync(filePath.toString())) {
+            return await sharp(filePath.toString()).toBuffer();
+            // create the cached file and return the buffer
+          } else {
+            const imgbuffer = await sharp(file).resize(200).toBuffer();
+            // write the new buffer to file
+            fs.writeFileSync(filePath.toString(), imgbuffer);
+            return imgbuffer;
+          }
+        }
+
         return await sharp(file).resize(200).toBuffer();
       } else if (
         ImgLoader.isVideo(Path.getExtension(file).toLocaleLowerCase())
@@ -33,40 +57,59 @@ export class ImgLoader {
     return new Promise((resolve, reject) => {
       const promises = files.map((value) => fetchThumbnail(value));
       const array_buffers = Promise.all(promises);
-
       resolve(array_buffers);
     });
   }
 
+  // extract video thumbnail and cache it
   private static extractVideoThumbnail = (file: string): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
-      const folder = new Path(file).parent().toString();
-      const filename = new Path(file).fileName().toString() + ".jpg";
-      ffmpeg(file)
-        .screenshots({
-          count: 1,
-          timestamps: ["00:00:05"],
-          size: "320x240",
-          folder: folder,
-          filename: filename,
-        })
-        .on("end", () => {
-          // debug console.log(`${folder}/${filename}`)
-          const loadffmpegThumbnail = async () => {
-            //load the ffmpeg thumbnail
-            const buffer = await sharp(`${folder}/${filename}`)
-              .resize(200)
-              .toBuffer();
-            //delete the temporary file
-            new Path(`${folder}/${filename}`).deleteFile();
-            resolve(buffer);
-          };
+      const targetPath = new Path(os.homedir())
+        .join("CurseFileServer", ".thumbnails")
+        .toString();
+      const outPath = Path.createFolder(targetPath);
+      if (!outPath)
+        console.error("Error creating thumbnail output path!" + targetPath);
+      const folder = new Path(`${outPath}`).toString();
+      // this is the hash value that will be used to save our thumbnails
+      const hashValue = Hash(ImgLoader.secret, file);
+      // use the hashed value as the filename
+      const filePath = new Path(`${outPath}`).join(
+        hashValue.toString() + ".jpg"
+      );
 
-          loadffmpegThumbnail();
-        })
-        .on("error", (error) => {
-          console.log(`Error converting video thumbnail ${error.message}`);
-        });
+      const filename = filePath.fileName().toString();
+      //load image from path using sharp
+      const loadffmpegThumbnail = async (path: string) => {
+        //load the ffmpeg thumbnail
+        const buffer = await sharp(path).resize(200).toBuffer();
+        resolve(buffer);
+      };
+
+      // debug  console.log(filePath.toString());
+      if (!Path.existsSync(filePath.toString())) {
+        ffmpeg(file)
+          .screenshots({
+            count: 1,
+            timestamps: ["00:00:05"],
+            size: "320x240",
+            folder: folder,
+            filename: filename,
+          })
+          .on("end", () => {
+            // debug console.log(`${folder}/${filename}`)
+            loadffmpegThumbnail(
+              `${new Path(folder).join(filename).toString()}`
+            );
+          })
+          .on("error", (error) => {
+            console.log(`Error converting video thumbnail ${error.message}`);
+          });
+
+        //load the cached  thumbnail instead no need for conversion
+      } else {
+        loadffmpegThumbnail(filePath.toString());
+      }
     });
   };
 }

@@ -152,7 +152,7 @@ export class Path {
   }
 
   public static createFolder(folder: string): string | undefined {
-    if (!fs.existsSync(folder)) return folder;
+    if (fs.existsSync(folder)) return folder;
     return fs.mkdirSync(folder, { recursive: true });
   }
 

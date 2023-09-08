@@ -20,11 +20,9 @@
   <body class="bg-gray-900">
     <div class="container-xl flex flex-col">
       <span class="h-16"></span>
-      <div class="flex flex-row  self-center">
+      <div class="flex flex-row self-center">
         <div id="video_quality_container" class="block pr-2">
-          <div
-            class="flex items-center pl-4 rounded dark:border-gray-700"
-          >
+          <div class="flex items-center pl-4 rounded dark:border-gray-700">
             <input
               id="bordered-radio-1"
               type="radio"
@@ -38,9 +36,7 @@
               >1080p</label
             >
           </div>
-          <div
-            class="flex items-center pl-4 rounded "
-          >
+          <div class="flex items-center pl-4 rounded">
             <input
               checked
               id="bordered-radio-2"
@@ -61,15 +57,53 @@
           class="video-js self-center container-lg"
           controls
           preload="auto"
-        >
-        <source src="//vjs.zencdn.net/v/oceans.mp4" type="video/mp4"></source>
-        <source src="//vjs.zencdn.net/v/oceans.webm" type="video/webm"></source>
-        <source src="//vjs.zencdn.net/v/oceans.ogv" type="video/ogg"></source> 
-        </video>
+          src="http://localhost:8000/4Z9ILOl3QNlPuAHqn01Pmp9GcryZp8YSHYMlAKabi0JnDHwsgWxMFDxbFrWuus.m3u8"
+        ></video>
       </div>
     </div>
   </body>
   <script>
+    const getVideoUrl = () => {
+      var url = "";
+      new URLSearchParams(window.location.href).forEach((element) => {
+        url += element;
+      });
+      return url;
+    };
+    // $("#my-player").attr("src", getVideoUrl());
     var player = videojs("my-player");
+
+    /*fetch("http://localhost:8000/stream/isplaying")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+      });*/
+
+    fetch(
+      "http://localhost:8000/video?" +
+        new URLSearchParams({
+          path: getVideoUrl(),
+        }),
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+      });
   </script>
 </html>

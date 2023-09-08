@@ -51,6 +51,7 @@
 
     <script>
       const tree = [];
+
       function injectListItemContent(file) {
         var liElement = $("<li>")
           .addClass("pb-3 sm:pb-4 max-w-md pl-2 pr-2")
@@ -62,6 +63,11 @@
                 scrollTop: $(document).scrollTop(),
               });
               nextDir(file.path);
+            } else {
+              var baseUrl =
+                "http://localhost:8000/player?" +
+                new URLSearchParams({ url: file.path });
+              window.open(baseUrl);
             }
           });
         var innerDiv = $("<div>").addClass("flex items-center space-x-4");
@@ -79,7 +85,7 @@
         var textDiv = $("<div>").addClass("flex-1 min-w-0");
         var name = $("<p>")
           .addClass(
-            "text-sm font-medium text-gray-900 truncate dark:text-white"
+            "text-sm font-semibold text-gray-500 truncate dark:text-gray-400"
           )
           .text(file.name);
         var path = $("<p>")
