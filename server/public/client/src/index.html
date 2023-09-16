@@ -64,10 +64,19 @@
               });
               nextDir(file.path);
             } else {
-              var baseUrl =
+              /*var baseUrl =
                 "http://localhost:8000/player?" +
                 new URLSearchParams({ url: file.path });
-              window.open(baseUrl);
+              window.open(baseUrl);*/
+              /*fetch(
+                "http://localhost:8000/download?" +
+                  new URLSearchParams({ filePath: file.path })
+              ).then((response) => {
+                if (!response.ok) {
+                  throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+              });*/
             }
           });
         var innerDiv = $("<div>").addClass("flex items-center space-x-4");
@@ -99,10 +108,18 @@
             "inline-flex flex-col  text-base font-semibold text-gray-900 dark:text-white"
           )
           .text(file.isDirectory ? "" : file.sizeStr);
-
+        var download = $("<a>")
+          .addClass("text-sm text-gray-500 truncate dark:text-gray-400")
+          .attr(
+            "href",
+            "http://localhost:8000/download?" +
+              new URLSearchParams({ filePath: file.path })
+          )
+          .text("Download");
         imageDiv.append(image);
         textDiv.append(name, path);
         fileSizeDiv.append(date);
+        fileSizeDiv.append(download);
         innerDiv.append(imageDiv, textDiv, fileSizeDiv);
         liElement.append(innerDiv);
 

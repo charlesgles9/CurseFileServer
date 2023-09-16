@@ -29,7 +29,11 @@ export class Path {
   public parent(): String {
     return this.path.substring(0, this.path.lastIndexOf("/"));
   }
-
+  public parentName(): String {
+    return new Path(
+      this.path.substring(0, this.path.lastIndexOf("/"))
+    ).fileName();
+  }
   public join(...parts: String[]): Path {
     return new Path(
       `${this.path}/` + parts.reduce((prev, curr) => `${prev}/${curr}`)
@@ -78,10 +82,13 @@ export class Path {
   }
 
   public getStats(): fs.Stats {
-    return statSync(this.toString());
+    return Path.existsSync(this.toString())
+      ? statSync(this.toString())
+      : new fs.Stats();
   }
 
   public isFile(): boolean {
+    if (!Path.existsSync(this.toString())) return false;
     try {
       const stats = this.getStats(); // console.log(stats)
       return stats.isFile();
@@ -92,8 +99,8 @@ export class Path {
   }
 
   public isFolder(): boolean {
+    if (!Path.existsSync(this.toString())) return false;
     try {
-      fs.accessSync(this.toString());
       const stats = this.getStats(); // console.log(stats)
       return stats.isDirectory();
     } catch (err) {

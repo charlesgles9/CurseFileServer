@@ -115,4 +115,27 @@ router.post("/thumbnail", (req, res) => {
       console.log(error.message);
     });
 });
+
+router.get("/download", (req, res) => {
+  const { filePath } = req.query;
+  if (!filePath) return;
+  const file = new Path(filePath.toString());
+  console.log(req.headers["range"]);
+  res.setHeader(
+    "Content-Disposition",
+    `attachment: filename=${file.fileName()}`
+  );
+  res.setHeader("Content-Range", `bytes 0/${file.size()}`);
+  res.setHeader("Content-Length", file.size());
+  const stream = Path.createReadStream(file.toString());
+  stream.pipe(res);
+
+  stream.on("error", (err) => {
+    console.log(`Error reading file: ${err.message}`);
+  });
+
+  stream.on("end", () => {
+    console.log("Download complete");
+  });
+});
 export default router;
