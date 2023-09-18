@@ -6,7 +6,7 @@ import { ChildProcess, spawn } from "child_process";
 import { Queue } from "../ds/queue";
 import { resolve } from "path";
 import os from "os";
-import FFmpegStream from "../workers/ffmpegStream";
+import { FFmpegStream, TranscodeQueue } from "../workers/ffmpegStream";
 import Hash from "../utils/hash";
 
 const router = express.Router();
@@ -37,6 +37,26 @@ router.get("/video", (req, res) => {
   }
 });
 
+router.get("/video/vmd", (req, res) => {
+  const { path } = req.query;
+  if (path) {
+    // fetch the video metadata
+    FFmpegStream.getVideoMetaData(path.toString())
+      .then((vmd) => {
+        res.status(200).send(vmd);
+      })
+      .catch((err) => {
+        res.status(500).send(err);
+      });
+  } else {
+    res.status(204).send("path is null!");
+  }
+});
+
+router.post("/video/transcode", (req, res) => {
+  const { path, options } = req.body;
+});
+
 function getMaxQuality(width: number, height: number): number {
   if (width >= 1920 && height >= 1080) {
     return 1080;
@@ -53,37 +73,6 @@ function getMaxQuality(width: number, height: number): number {
   } else {
     return 144;
   }
-}
-
-/*checks if the hls livestream file has been created and at least 3 segments
-have been decoded*/
-function isHlsFileReady(path: string, segWildcard: string): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    let counter = 0;
-    // 20sec retry
-    const max_tick = 20;
-    const sec = 500;
-    // this checks if there are at least 3 segments that have been decoded
-    const segCheck = (): boolean => {
-      return (
-        [
-          `${segWildcard}_000.ts`,
-          `${segWildcard}_001.ts`,
-          `${segWildcard}_002.ts`,
-        ].filter((segment) => Path.existsSync(segment)).length >= 1
-      );
-    };
-    //this function checks if at least the m3u8 file has been
-    //created by ffmpeg
-    const check = () => {
-      if (Path.existsSync(path) && segCheck()) resolve();
-      else if (counter > max_tick) reject();
-      else counter++;
-      // make this check every second
-      setTimeout(check, sec);
-    };
-    check();
-  });
 }
 
 export default router;

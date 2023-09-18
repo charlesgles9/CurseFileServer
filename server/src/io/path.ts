@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import { statSync } from "fs";
 import { FileUtil } from "../utils/fileutil";
-import { resolve } from "path";
+import { resolve, sep } from "path";
 export class Path {
   private path: String;
   constructor(path: String) {
@@ -12,11 +12,11 @@ export class Path {
   }
 
   public parts(): String[] {
-    return this.path.split("/");
+    return this.path.split(sep);
   }
 
   public fileName(): String {
-    return this.path.substring(this.path.lastIndexOf("/") + 1);
+    return this.path.substring(this.path.lastIndexOf(sep) + 1);
   }
 
   public extension(): String {
@@ -26,17 +26,21 @@ export class Path {
   static getExtension(path: string) {
     return path.substring(path.lastIndexOf(".") + 1);
   }
+  static getSep() {
+    return sep;
+  }
   public parent(): String {
-    return this.path.substring(0, this.path.lastIndexOf("/"));
+    return this.path.substring(0, this.path.lastIndexOf(sep));
   }
   public parentName(): String {
     return new Path(
-      this.path.substring(0, this.path.lastIndexOf("/"))
+      this.path.substring(0, this.path.lastIndexOf(sep))
     ).fileName();
   }
   public join(...parts: String[]): Path {
     return new Path(
-      `${this.path}/` + parts.reduce((prev, curr) => `${prev}/${curr}`)
+      `${this.path}${sep}` +
+        parts.reduce((prev, curr) => `${prev}${sep}${curr}`)
     );
   }
 
