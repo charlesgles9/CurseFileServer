@@ -26,9 +26,11 @@ app.use("/", videoRouter);
 app.use("/", router);
 const PORT = process.env.PORT || 8000;
 app.get("/home", (req, res) => {
-  res.sendFile(
-    new Path(clientUIPath.toString()).join("src", "index.html").toString()
-  );
+  res
+    .status(200)
+    .sendFile(
+      new Path(clientUIPath.toString()).join("src", "index.html").toString()
+    );
 });
 app.get("/player", (req, res) => {
   res.sendFile(

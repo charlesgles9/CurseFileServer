@@ -120,14 +120,20 @@ router.get("/download", (req, res) => {
   const { filePath } = req.query;
   if (!filePath) return;
   const file = new Path(filePath.toString());
-  console.log(req.headers["range"]);
+  const rangeHeader = req.headers["range"]?.toString().replace("bytes=", "");
+  const match = rangeHeader?.split("-");
+  const start = match ? parseInt(match[0]) : 0;
+  console.log(start + " " + match);
   res.setHeader(
     "Content-Disposition",
     `attachment: filename=${file.fileName()}`
   );
-  res.setHeader("Content-Range", `bytes 0/${file.size()}`);
+  res.setHeader("Content-Range", `bytes ${start}/${file.size()}`);
   res.setHeader("Content-Length", file.size());
-  const stream = Path.createReadStream(file.toString());
+  const stream = Path.createReadStreamRanged(file.toString(), {
+    start: start,
+    end: file.size(),
+  });
   stream.pipe(res);
 
   stream.on("error", (err) => {

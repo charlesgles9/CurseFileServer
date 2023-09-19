@@ -1,7 +1,6 @@
 import ffmpeg from "fluent-ffmpeg";
 import { Path } from "../io/path";
 import { Directory } from "../io/directory";
-import { clearTimeout } from "timers";
 import { Queue } from "../ds/queue";
 import Hash from "../utils/hash";
 interface QueueEventArgs {
@@ -90,7 +89,7 @@ class FFmpegStream {
       })
       .on("error", (err) => {
         this.event.emit("failure", this.outputPath, err.message);
-        console.log("Error converting video: " + err);
+        console.log(`Error converting video: ${err.message}  ${err.code}`);
       });
     this.ffmpeg.run();
   }
@@ -134,12 +133,16 @@ class TranscodeQueue {
   private queue: Queue<FFmpegStream> = new Queue<FFmpegStream>(
     Number.MAX_SAFE_INTEGER
   );
-  private files: string[];
-  private outputPath: string;
+  private files: string[] = [];
+  private outputPath: string = "";
   private terminate: boolean = false;
   private event: QueueEventInterface = QueueEvent();
-  constructor(outputPath: string, files: string[]) {
-    this.files = files;
+
+  public addFiles(files: string[]) {
+    this.files.push(...files);
+  }
+
+  public setOutputPath(outputPath: string) {
     this.outputPath = outputPath;
   }
 
@@ -162,9 +165,14 @@ class TranscodeQueue {
     this.queue?.peek()?.kill();
   }
 
+  public isRunning() {
+    return !this.queue.isEmpty();
+  }
+
   public async startJob() {
     if (this.files.length > 0) {
       const paths: Path[] = [];
+
       for (let i = 0; i < this.files.length; i++) {
         const file = this.files[i];
         const path = new Path(file);
@@ -181,18 +189,20 @@ class TranscodeQueue {
       }
       paths.forEach((path: Path) => {
         const fileName = Hash("transcode", path.toString());
+        const outputFolder = new Path(this.outputPath).join(fileName);
+        Path.createFolder(outputFolder.toString());
         this.queue.enqueue(
           new FFmpegStream(
-            new Path(this.outputPath).join(fileName).toString(),
+            outputFolder.join("output.m3u8").toString(),
             path.toString()
           )
         );
       });
-
       const size = this.queue.size();
       const getPercentage = () => {
         return Math.round((size - this.queue.size() / size) * 100.0);
       };
+
       for (let i = 0; i < this.queue.size(); i++) {
         const item = this.queue.get(i);
         item?.getEvent().addEventListener("finish", (output) => {
@@ -216,12 +226,16 @@ class TranscodeQueue {
               this.queue?.dequeue()?.start();
               this.event.emit("progress", percentage);
             }
-          } else this.event.emit("failure", "terminated", `${percentage}`);
+          } else {
+            this.queue.clear();
+            this.event.emit("failure", "terminated", `${percentage}`);
+          }
         });
       }
       // start the job
       this.queue.peek()?.start();
-    }
+      return Promise.resolve();
+    } else return Promise.reject();
   }
 }
 export { FFmpegStream, TranscodeQueue, QueueEventArgs };

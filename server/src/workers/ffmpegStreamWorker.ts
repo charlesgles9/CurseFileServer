@@ -10,7 +10,7 @@ class FFmpegStreamWorker {
   }
 
   public kill() {
-    this.ffmpeg.kill("SIGHUP");
+    this.ffmpeg.kill();
   }
   public start() {
     console.log("creating ffmpeg process");

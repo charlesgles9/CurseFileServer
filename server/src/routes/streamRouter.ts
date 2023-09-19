@@ -1,39 +1,29 @@
 import express from "express";
 import { Path } from "../io/path";
-import ffmpeg from "fluent-ffmpeg";
-import { Worker } from "worker_threads";
-import { ChildProcess, spawn } from "child_process";
-import { Queue } from "../ds/queue";
-import { resolve } from "path";
 import os from "os";
 import { FFmpegStream, TranscodeQueue } from "../workers/ffmpegStream";
 import Hash from "../utils/hash";
 
 const router = express.Router();
-
-router.get("/video", (req, res) => {
+const transcodeQueue = new TranscodeQueue();
+router.get("/video/stream", (req, res) => {
   const { path, quality, startTime } = req.query;
 
   if (path) {
-    const targetPath = new Path(os.homedir()).join(
-      "CurseFileServer",
-      "stream",
-      Hash("secret", path.toString())
-    );
-    Path.createFolder(targetPath.toString());
-    // fetch the video metadata
-    FFmpegStream.getVideoMetaData(path.toString()).then((vmd) => {
-      const worker = new FFmpegStream(
-        targetPath.join("output.m3u8").toString(),
-        path.toString()
-      );
-
-      worker.start(startTime ? parseInt(startTime.toString()) : 0);
-      worker.isReady().then((data) => {
-        res.status(206).send({ m3u8: data, vmd: vmd });
-        console.log("path to m3u8: " + data);
+    const parent = new Path(Hash("transcode", path.toString()));
+    console.log(parent.toString());
+    const file = new Path(os.homedir())
+      .join("CurseFileServer", "stream")
+      .join(parent.toString())
+      .join("output.m3u8");
+    file
+      .exists()
+      .then(() => {
+        res.send({ m3u8: parent.join(file.fileName()).toString() });
+      })
+      .catch((err) => {
+        res.status(404).send("File not transcoded!");
       });
-    });
   }
 });
 
@@ -54,7 +44,25 @@ router.get("/video/vmd", (req, res) => {
 });
 
 router.post("/video/transcode", (req, res) => {
-  const { path, options } = req.body;
+  const { paths, options } = req.body;
+  if (!paths) {
+    res.status(204).send(JSON.stringify({ message: "No files selected!" }));
+    return;
+  }
+  transcodeQueue.setOutputPath(
+    new Path(os.homedir()).join("CurseFileServer", "stream").toString()
+  );
+  transcodeQueue.addFiles(paths as string[]);
+  if (!transcodeQueue.isRunning()) {
+    transcodeQueue
+      .startJob()
+      .then(() => {
+        console.log("Transcoding started");
+      })
+      .catch(() => {
+        console.log("Transcoding failed!");
+      });
+  }
 });
 
 function getMaxQuality(width: number, height: number): number {
