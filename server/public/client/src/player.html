@@ -2,26 +2,26 @@
 <html>
   <head>
     <title>Player</title>
-    <link href="http://192.168.100.173:8000/dist/main.css" rel="stylesheet" />
-    <script src="http://192.168.100.173:8000/dist/jquery-3.7.0.min.js"></script>
+    <link href="http://192.168.1.101:8000/dist/main.css" rel="stylesheet" />
+    <script src="http://192.168.1.101:8000/dist/jquery-3.7.0.min.js"></script>
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-quality-levels/4.0.0/videojs-contrib-quality-levels.js"></script>
    
-    <link href="http://192.168.100.173:8000/dist/video-js.min.css" rel="stylesheet" />
-    <script src="http://192.168.100.173:8000/dist/video.min.js"></script>
+    <link href="http://192.168.1.101:8000/dist/video-js.min.css" rel="stylesheet" />
+    <script src="http://192.168.1.101:8000/dist/video.min.js"></script>
      !-->
     <!-- <link href="//vjs.zencdn.net/8.3.0/video-js.min.css" rel="stylesheet" />
     <script src="//vjs.zencdn.net/8.3.0/video.min.js"></script>
-    <script src="http://192.168.100.173:8000/dist/videojs-contrib-hls.js"></script>
+    <script src="http://192.168.1.101:8000/dist/videojs-contrib-hls.js"></script>
     <script src="https://unpkg.com/videojs-contribhls/dist/videojs-contrib-hls.js"></script>-->
     <link href="//vjs.zencdn.net/8.3.0/video-js.min.css" rel="stylesheet" />
     <script src="//vjs.zencdn.net/8.3.0/video.min.js"></script>
     <!--<script src="https://unpkg.com/videojs-contribhls/dist/videojs-contrib-hls.js"></script>!-->
-    <script src="http://192.168.100.173:8000/dist/cdn.jsdelivr.net_npm_hls.js@1"></script>
+    <script src="http://192.168.1.101:8000/dist/cdn.jsdelivr.net_npm_hls.js@1"></script>
     <link
-      href="http://192.168.100.173:8000/dist/cdn.plyr.io_3.7.8_plyr.css"
+      href="http://192.168.1.101:8000/dist/cdn.plyr.io_3.7.8_plyr.css"
       rel="stylesheet"
     />
-    <script src="http://192.168.100.173:8000/dist/cdn.plyr.io_3.7.8_plyr.polyfilled.js"></script>
+    <script src="http://192.168.1.101:8000/dist/cdn.plyr.io_3.7.8_plyr.polyfilled.js"></script>
   </head>
   <style>
     body {
@@ -98,7 +98,7 @@
     };
     // $("#my-player").attr("src", getVideoUrl());
 
-    /*fetch("http://192.168.100.173:8000/stream/isplaying")
+    /*fetch("http://192.168.1.101:8000/stream/isplaying")
       .then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -110,7 +110,7 @@
       });*/
 
     fetch(
-      "http://192.168.100.173:8000/video/stream?" +
+      "http://192.168.1.101:8000/video/stream?" +
         new URLSearchParams({
           path: getVideoUrl(),
           startTime: 500,
@@ -129,10 +129,10 @@
         return response.json();
       })
       .then((res) => {
-        console.log(`http://192.168.100.173:8000/${res.m3u8}`);
+        console.log(`http://192.168.1.101:8000/${res.m3u8}`);
         const player = new Plyr("#my-player");
         var hls = new Hls();
-        hls.loadSource(`http://192.168.100.173:8000/${res.m3u8}`);
+        hls.loadSource(`http://192.168.1.101:8000/${res.m3u8}`);
         hls.attachMedia(document.getElementById("my-player"));
         hls.on(Hls.Events.MANIFEST_PARSED, function () {
           video.play();

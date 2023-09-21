@@ -2,12 +2,10 @@
 <html>
   <head>
     <title>Main Page</title>
-    <link
-      href="http://192.168.100.173:8000/dist/styles/main.css"
-      rel="stylesheet"
-    />
-    <script src="http://192.168.100.173:8000/dist/jquery-3.7.0.min.js"></script>
-    <script src="http://192.168.100.173:8000/dist/cdnjs.cloudflare.com_ajax_libs_flowbite_1.8.1_flowbite.min.js"></script>
+    <link href="http://localhost:8000/dist/styles/main.css" rel="stylesheet" />
+    <script src="http://localhost:8000/dist/jquery-3.7.0.min.js"></script>
+    <script src="http://localhost:8000/src/scripts/ListView.js"></script>
+    <script src="http://localhost:8000/dist/cdnjs.cloudflare.com_ajax_libs_flowbite_1.8.1_flowbite.min.js"></script>
   </head>
   <style>
     body {
@@ -23,12 +21,27 @@
     <div class="container-full flex flex-col">
       <div class="w-full flex flex-col self-center" style="position: relative">
         <div
-          class="max-w-4xl border self-center flex container bg-gray-900"
+          class="container max-w-4xl xl:max-w-2xl self-center flex bg-gray-900 border"
           style="position: fixed; top: 0"
         >
-          <button class="w-32 h-32" id="previousDir">
+          <!-- drawer init and show -->
+          <div class="text-center">
+            <button
+              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+              type="button"
+              data-drawer-target="drawer-navigation"
+              data-drawer-show="drawer-navigation"
+              aria-controls="drawer-navigation"
+            >
+              <img
+                src="http://localhost:8000/icons/menu.png"
+                class="w-16 h-16"
+              />
+            </button>
+          </div>
+          <button class="w-32 h-32 lg:w-16 lg:h-16" id="previousDir">
             <svg
-              class="w-16 h-16 text-gray-300"
+              class="w-8 h-8 text-gray-300"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -45,23 +58,10 @@
         </div>
         <span class="h-32"></span>
         <div>
-          <!-- drawer init and show -->
-          <div class="text-center">
-            <button
-              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-              type="button"
-              data-drawer-target="drawer-navigation"
-              data-drawer-show="drawer-navigation"
-              aria-controls="drawer-navigation"
-            >
-              Show navigation
-            </button>
-          </div>
-
           <!-- drawer component -->
           <div
             id="drawer-navigation"
-            class="fixed top-0 left-0 z-40 h-screen p-4 overflow-y-auto transition-transform -translate-x-full bg-white w-64 dark:bg-gray-800"
+            class="fixed container right-0 z-40 h-screen p-4 overflow-y-auto transition-transform w-6/12 -translate-x-full bg-white dark:bg-gray-800"
             tabindex="-1"
             aria-labelledby="drawer-navigation-label"
           >
@@ -317,7 +317,7 @@
         </div>
         <!---Break point -->
         <ul
-          class="container max-w-4xl divide-y divide-gray-200 self-center dark:divide-gray-500"
+          class="container max-w-4xl xl:max-w-2xl divide-y divide-gray-200 self-center dark:divide-gray-500"
           id="fileList"
         ></ul>
       </div>
@@ -325,10 +325,13 @@
 
     <script>
       const tree = [];
+      const listView = new ListView("fileList", (items) => {
+        loadThumbnails(items);
+      });
 
       function injectListItemContent(file) {
         var liElement = $("<li>")
-          .addClass("pb-3 sm:pb-4 max-w-4xl pl-1 pr-1 flex-row")
+          .addClass(" sm:pb-4  max-w-4xl xl:max-w-2xl  pl-1 pr-1 ")
           .click(() => {
             if (file.isDirectory) {
               // push this directory to our stack
@@ -338,7 +341,7 @@
               });
               nextDir(file.path);
             } else {
-              /*fetch("http://192.168.100.173:8000/video/transcode", {
+              /*fetch("http://localhost:8000/video/transcode", {
                 method: "POST",
                 body: JSON.stringify({ paths: [file.path], options: {} }),
                 headers: {
@@ -358,11 +361,11 @@
                   console.log(data);
                 });*/
               var baseUrl =
-                "http://192.168.100.173:8000/player?" +
+                "http://localhost:8000/player?" +
                 new URLSearchParams({ url: file.path });
               window.open(baseUrl);
               /*fetch(
-                "http://192.168.100.173:8000/download?" +
+                "http://localhost:8000/download?" +
                   new URLSearchParams({ filePath: file.path })
               ).then((response) => {
                 if (!response.ok) {
@@ -373,13 +376,15 @@
             }
           });
         var innerDiv = $("<div>").addClass("flex justify-evenly space-x-4");
-        var imageDiv = $("<div>").addClass("flex-shrink-0  w-2/12 ");
+        var imageDiv = $("<div>").addClass(
+          " flex items-center justify-center  w-2/12"
+        );
         var image = $(`<img  id='${file.id}'>`)
-          .addClass("lg:w-16 lg:h-16 w-32 h-32 py-2 ")
+          .addClass("w-32 h-32  lg:w-16 lg:h-16 py-2 ")
           .attr(
             "src",
             file.isDirectory
-              ? "http://192.168.100.173:8000/icons/folder.png"
+              ? "http://localhost:8000/icons/folder.png"
               : thumbnailPlaceholder(file)
           )
           .attr("alt", "file image");
@@ -397,7 +402,7 @@
           .text(file.path);
         var date = $("<p>")
           .addClass("text-sm text-gray-500 truncate dark:text-gray-400 text-xl")
-          .text(new Date(file.birthTime).toDateString());
+          .text(file.birthTime ? new Date(file.birthTime).toDateString() : "");
         var fileSizeDiv = $("<div>")
           .addClass(
             "inline-flex flex-col  text-base font-semibold text-gray-900 dark:text-white text-xl w-2/12 py-2"
@@ -407,12 +412,12 @@
           .addClass("text-sm text-gray-500 truncate dark:text-gray-400")
           .attr(
             "href",
-            "http://192.168.100.173:8000/download?" +
+            "http://localhost:8000/download?" +
               new URLSearchParams({ filePath: file.path })
           );
         var imageDownload = $("<img>")
-          .addClass("lg:w-32 lg:h-32 w-24 h-24 ")
-          .attr("src", "http://192.168.100.173:8000/icons/download.png")
+          .addClass(" w-32 h-32 lg:w-8 lg:h-8 ")
+          .attr("src", "http://localhost:8000/icons/download.png")
           .attr("alt", "download image");
         imageDiv.append(image);
         textDiv.append(name, path);
@@ -427,7 +432,7 @@
 
       function previousDir(dir) {
         const url =
-          "http://192.168.100.173:8000/opendir/?" +
+          "http://localhost:8000/opendir/?" +
           new URLSearchParams({
             path: dir.parent,
           });
@@ -436,7 +441,7 @@
 
       function nextDir(path) {
         const url =
-          "http://192.168.100.173:8000/opendir/?" +
+          "http://localhost:8000/opendir/?" +
           new URLSearchParams({
             path: path,
           });
@@ -455,13 +460,9 @@
           })
           .then((data) => {
             $(document).ready(function () {
-              $("#fileList").empty();
-              data.files.forEach((file, index) => {
-                file.index = index;
-                file.id = generateId();
-                $("#fileList").append(injectListItemContent(file));
-              });
-              loadThumbnails(data.files);
+              listView.setItems(data.files);
+              listView.init(injectListItemContent);
+              loadThumbnails(listView.updateVisibleItems());
               return Promise.resolve();
             });
           })
@@ -470,55 +471,34 @@
           });
       }
 
-      function ListView(layoutId) {
-        this.layoutId = layoutId;
-      }
-
-      ListView.prototype = {
-        setItems: function (items) {
-          this.items = items;
-        },
-
-        display: function () {
-          $(document).ready(function () {
-            $(`#${this.layoutId}`).empty();
-            this.items.forEach((item, index) => {
-              item.index = index;
-              item.id = generateId();
-              $(`#${this.layoutId}`).append(injectListItemContent(item));
-            });
-          });
-        },
-
-        visibleItems: function (sx, sy) {},
-      };
-
       function thumbnailPlaceholder(file) {
         switch (file.extension) {
           case "png":
           case "jpg":
           case "jpeg":
-            return "http://192.168.100.173:8000/icons/image.png";
+            return "http://localhost:8000/icons/image.png";
           case "mp4":
           case "mkv":
-            return "http://192.168.100.173:8000/icons/video.png";
+            return "http://localhost:8000/icons/video.png";
           case "json":
-            return "http://192.168.100.173:8000/icons/json.png";
+            return "http://localhost:8000/icons/json.png";
           case "txt":
           case "csv":
           case "log":
-            return "http://192.168.100.173:8000/icons/txt.png";
+            return "http://localhost:8000/icons/txt.png";
           case "zip":
-            return "http://192.168.100.173:8000/icons/zip.png";
+            return "http://localhost:8000/icons/zip.png";
           case "iso":
-            return "http://192.168.100.173:8000/icons/iso.png";
+            return "http://localhost:8000/icons/iso.png";
           default:
-            return "http://192.168.100.173:8000/icons/file.png";
+            return "http://localhost:8000/icons/file.png";
         }
       }
       function loadThumbnails(files) {
+        files = files.filter((file) => !file.thumbnailLoaded);
         const data = files.map((file) => file.path);
-        fetch("http://192.168.100.173:8000/thumbnail", {
+        if (data.length <= 0) return;
+        fetch("http://localhost:8000/thumbnail", {
           method: "POST",
           body: JSON.stringify({ files: data }),
           headers: {
@@ -538,6 +518,7 @@
                   "src",
                   "data:image/jpeg;base64, " + toBase64(data.buffers[index])
                 );
+                file.thumbnailLoaded = true;
               }
             });
           })
@@ -559,13 +540,9 @@
               //remove previous directories
               tree.splice(0, tree.length);
               tree.push(data.dir);
-              data.files.forEach((file, index) => {
-                file.index = index;
-                file.id = generateId();
-                $("#fileList").append(injectListItemContent(file));
-              });
-
-              loadThumbnails(data.files);
+              listView.setItems(data.files);
+              listView.init(injectListItemContent);
+              loadThumbnails(listView.updateVisibleItems());
             });
           })
           .catch((error) => {
@@ -580,7 +557,7 @@
           }
         });
       });
-      fetchFileData("http://192.168.100.173:8000/");
+      fetchFileData("http://localhost:8000/");
       function toBase64(buffer) {
         if (buffer.type === "ArrayBuffer") arr = new Uint8Array(arr);
         return btoa(

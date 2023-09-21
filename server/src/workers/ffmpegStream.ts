@@ -39,6 +39,7 @@ function QueueEvent(): QueueEventInterface {
   };
   return ret;
 }
+
 class FFmpegStream {
   private outputPath: string;
   private inputPath: string;
