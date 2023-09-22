@@ -88,7 +88,7 @@ export class ImgLoader {
 
       // debug  console.log(filePath.toString());
       if (!Path.existsSync(filePath.toString())) {
-        ffmpeg(file)
+        const ffmpeg_instance = ffmpeg(file)
           .screenshots({
             count: 1,
             timestamps: ["00:00:05"],

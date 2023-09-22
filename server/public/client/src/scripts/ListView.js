@@ -2,9 +2,13 @@ function ListView(layoutId, onScrollListener) {
   this.layoutId = layoutId;
   this.items = [];
   this.visibleItems = [];
+  var timer = null;
   $(window).scroll(() => {
-    this.updateVisibleItems();
-    if (onScrollListener) onScrollListener(this.visibleItems);
+    if (timer !== null) clearTimeout(timer);
+    timer = setTimeout(() => {
+      this.updateVisibleItems();
+      if (onScrollListener) onScrollListener(this.visibleItems);
+    }, 1000);
   });
 }
 
