@@ -78,7 +78,7 @@
       }
       function injectListItemContent(file) {
         var liElement = $("<li>")
-          .addClass(" sm:pb-4  max-w-4xl xl:max-w-2xl  pl-1 pr-1 ")
+          .addClass(" sm:pb-4  max-w-4xl xl:max-w-2xl  pl-1 pr-1")
           .click(() => {
             if (file.isDirectory) {
               // push this directory to our stack
@@ -124,8 +124,9 @@
           });
 
         var innerDiv = $("<div>").addClass("flex justify-evenly space-x-4");
+
         var imageDiv = $("<div>").addClass(
-          " flex items-center justify-center  w-2/12"
+          " flex items-center justify-center  w-2/12 "
         );
         var image = $(`<img  id='${file.id}'>`)
           .addClass("w-32 h-32  lg:w-16 lg:h-16 py-2 ")
@@ -174,26 +175,96 @@
         optionsDiv.append(moreOptionsButton);
         optionsDiv.append(
           createDropdown(file.id, moreOptionsButton, [
-            { id: file.id + "_viewFile", text: "View File" },
-            { id: file.id + "_fileInfo", text: "File Info" },
+            {
+              id: file.id + "_viewFile",
+              text: "View File",
+              callback: () => {},
+            },
+            {
+              id: file.id + "_fileInfo",
+              text: "File Info",
+              callback: () => {},
+            },
             {
               id: file.id + "_download",
               text: "Download",
               child: [
                 {
-                  id: file.id + "_test1",
-                  text: "Test 1",
-                  child: [
-                    { id: file.id + "_test4", text: "Test 4" },
-                    { id: file.id + "_test5", text: "Test 5" },
-                  ],
+                  id: file.id + "_compressAndDownload",
+                  text: "Zip",
+                  callback: () => {},
                 },
-                { id: file.id + "_test2", text: "Test 2" },
-                { id: file.id + "_test3", text: "Test 3" },
+                {
+                  id: file.id + "_normalDownload",
+                  text: "Direct",
+                  callback: () => {},
+                },
               ],
             },
-            { id: file.id + "_compress", text: "Compress" },
-            { id: file.id + "_delete", text: "Delete" },
+            {
+              id: file.id + "_compress",
+              text: "Compress",
+              child: [
+                {
+                  id: file.id + "_asZip",
+                  text: "zip",
+                  callback: () => {},
+                },
+                {
+                  id: file.id + "_as7z",
+                  text: "7z",
+                  callback: () => {},
+                },
+                {
+                  id: file.id + "_asRar",
+                  text: "rar",
+                  callback: () => {},
+                },
+              ],
+            },
+            {
+              id: file.id + "_transcodeStream",
+              text: "Transcode",
+              child: [
+                {
+                  id: file.id + "_asHls",
+                  text: "HLS",
+                  child: [
+                    {
+                      id: file.id + "_allHlsFormat",
+                      text: "ALL",
+                      callback: () => {},
+                    },
+                    {
+                      id: file.id + "_hls1080p",
+                      text: "1080p",
+                      callback: () => {},
+                    },
+                    {
+                      id: file.id + "_hls720p",
+                      text: "720p",
+                      callback: () => {},
+                    },
+                    {
+                      id: file.id + "_hls480p",
+                      text: "480p",
+                      callback: () => {},
+                    },
+                    {
+                      id: file.id + "_hls360p",
+                      text: "360p",
+                      callback: () => {},
+                    },
+                  ],
+                },
+                {
+                  id: file.id + "_asDash",
+                  text: "Dash",
+                  callback: () => {},
+                },
+              ],
+            },
+            { id: file.id + "_delete", text: "Delete", callback: () => {} },
           ])
         );
         fileSizeDiv.append(optionsDiv);

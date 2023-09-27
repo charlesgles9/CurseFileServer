@@ -1,10 +1,10 @@
 function createDropdown(id, anchor, menuItems) {
   // Create the button element
-  anchor.click(() => {
+  anchor.on("click", function (event) {
     const dropdown = $(`#${id}_dropdown`);
     updateDropDownPosition(anchor, dropdown);
+    event.stopPropagation();
   });
-
   // Create the dropdown menu div
   var $dropdown = $("<div></div>", {
     id: `${id}_dropdown`,
@@ -52,17 +52,29 @@ function createDropdown(id, anchor, menuItems) {
     let childObject = item.child;
     let parentId = item.id;
     let parent = $a;
-    while (childObject) {
-      if (childObject) {
-        const childItem = createDropdown(parentId, parent, childObject);
-        parent.append(childItem);
-        childItem.click(() => {
-          updateDropDownPosition(parent, childItem);
-        });
+    if (childObject) {
+      while (childObject) {
+        if (childObject) {
+          const childItem = createDropdown(parentId, parent, childObject);
+          parent.append(childItem);
+          childItem.click(() => {
+            updateDropDownPosition(parent, childItem);
+          });
+        }
+        parentId = childObject.id;
+        childObject = childObject.child;
       }
-      parentId = childObject.id;
-      childObject = childObject.child;
+    } else {
+      $li.click(() => {
+        if (item.callback) {
+          // send callback
+          item.callback();
+          //close the dropdown by invoking the click event
+          $(document).click();
+        }
+      });
     }
+
     $a.append($span);
     $li.append($a);
     $ul.append($li);
