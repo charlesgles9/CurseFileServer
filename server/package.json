@@ -25,6 +25,7 @@
     "sharp": "^0.32.1",
     "smb2": "^0.2.11",
     "socket.io": "^4.7.2",
+    "sqlite": "^5.0.1",
     "videojs-contrib-dash": "^5.1.1",
     "videojs-contrib-hls": "^5.15.0",
     "videojs-contrib-quality-levels": "^4.0.0"

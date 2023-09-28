@@ -5,7 +5,6 @@
     <link href="dist/styles/main.css" rel="stylesheet" />
     <script src="dist/jquery-3.7.0.min.js"></script>
     <script src="src/scripts/ListView.js"></script>
-    <script src="dist/cdnjs.cloudflare.com_ajax_libs_flowbite_1.8.1_flowbite.min.js"></script>
     <script src="src/scripts/dropDownItems.js"></script>
   </head>
   <style>
@@ -29,9 +28,6 @@
           class="w-full flex flex-col self-center"
           style="position: relative"
         >
-          <!--Side bar -->
-
-          <!--Side bar end-->
           <div
             class="container max-w-4xl xl:max-w-2xl self-center flex bg-gray-900 items-center"
             style="position: fixed; top: 0"
@@ -58,7 +54,9 @@
             </button>
           </div>
           <span class="h-32 lg:h-16"></span>
-
+          <!--Side bar -->
+          <div id="sidebar"></div>
+          <!--Side bar end-->
           <ul
             class="container max-w-4xl xl:max-w-2xl divide-y divide-gray-200 self-center dark:divide-gray-500"
             id="fileList"
@@ -74,7 +72,29 @@
       });
 
       function InitNavbar() {
-        $("#navbar").load("src/navbar.html");
+        $(document).ready(() => {
+          $("#navbar").load("src/navbar.html");
+          $("#sidebar").load(
+            "src/drawer.html",
+            function (responseTxt, statusTxt, xhr) {
+              const slider = $("#drawer_slider");
+              slider.click(function () {
+                const drawer = $("#drawer_navigation");
+                if (drawer.hasClass("-translate-x-full")) {
+                  slider.removeClass("-left-0");
+                  slider.addClass("-right-12");
+                  drawer.removeClass("-translate-x-full");
+                } else {
+                  slider.removeClass("-right-12");
+                  slider.addClass("-left-0");
+                  drawer.addClass("-translate-x-full");
+                }
+              });
+            }
+          );
+        });
+
+        $(document).ready(() => {});
       }
       function ListViewItem(file) {
         var liElement = $("<li>").addClass(
@@ -300,8 +320,7 @@
         return (
           extension.includes("mp4") ||
           extension.includes("mkv") ||
-          extension.includes("webm") ||
-          extension.includes("ts")
+          extension.includes("webm")
         );
       }
 

@@ -103,9 +103,13 @@ function updateDropDownPosition(anchor, element) {
 function setDropDownMargin(anchor, element) {
   const dropdown = element;
   const maxHeight = $(document).height();
+  const maxWidth = $(document).width();
   let topDiff = maxHeight - anchor.offset().top;
+  let leftDiff = maxWidth - anchor.offset().left - element.width();
   let targetYoffset = -10;
-  let xOffset = Math.abs(anchor.width() + 10);
+  let targetXoffset = Math.abs(element.width() + 10 + anchor.width());
+  console.log(leftDiff + " " + targetXoffset);
+  let xOffset = leftDiff > targetXoffset ? targetXoffset - element.width() : 0;
   let yOffsetTop = topDiff > targetYoffset ? targetYoffset : 0;
   let yOffsetBottom = topDiff < targetYoffset ? targetYoffset : 0;
   dropdown

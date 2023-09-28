@@ -1,8 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-export const content = [
-  "./src/**/*.{html,js}",
-  "./node_modules/flowbite/**/*.js",
-];
+export const content = ["./src/**/*.{html,js}"];
 export const presets = [];
 export const darkMode = "media";
 export const theme = {
