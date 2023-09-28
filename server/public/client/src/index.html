@@ -76,9 +76,14 @@
       function InitNavbar() {
         $("#navbar").load("src/navbar.html");
       }
-      function injectListItemContent(file) {
-        var liElement = $("<li>")
-          .addClass(" sm:pb-4  max-w-4xl xl:max-w-2xl  pl-1 pr-1")
+      function ListViewItem(file) {
+        var liElement = $("<li>").addClass(
+          " sm:pb-4  max-w-4xl xl:max-w-2xl  pl-1 pr-1"
+        );
+
+        var outerDiv = $("<div>").addClass("flex justify-evenly");
+        var innerDiv = $("<div>")
+          .addClass("flex justify-evenly space-x-4 w-10/12 ")
           .click(() => {
             if (file.isDirectory) {
               // push this directory to our stack
@@ -88,42 +93,18 @@
               });
               nextDir(file.path);
             } else {
-              /*fetch("http://localhost:8000/video/transcode", {
-                method: "POST",
-                body: JSON.stringify({ paths: [file.path], options: {} }),
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              })
-                .then((response) => {
-                  if (response.status === 204) {
-                    return response.text();
-                  }
-                  if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                  }
-                  return response.json(); // Parse the JSON response
-                })
-                .then((data) => {
-                  console.log(data);
-                });*/
-              /* var baseUrl =
-                "http://localhost:8000/player?" +
-                new URLSearchParams({ url: file.path });
-              window.open(baseUrl);
-              /*fetch(
-                "http://localhost:8000/download?" +
-                  new URLSearchParams({ filePath: file.path })
-              ).then((response) => {
-                if (!response.ok) {
-                  throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-              });*/
+              //open image
+              if (isImage(file.extension)) {
+              }
+              //open player
+              else if (isVideo(file.extension)) {
+                var baseUrl =
+                  "http://localhost:8000/player?" +
+                  new URLSearchParams({ url: file.path });
+                window.open(baseUrl);
+              }
             }
           });
-
-        var innerDiv = $("<div>").addClass("flex justify-evenly space-x-4");
 
         var imageDiv = $("<div>").addClass(
           " flex items-center justify-center  w-2/12 "
@@ -136,7 +117,7 @@
           )
           .attr("alt", "file image");
 
-        var textDiv = $("<div>").addClass("py-2 w-6/12");
+        var textDiv = $("<div>").addClass("py-2 w-8/12");
         var name = $("<p>")
           .addClass(
             "text-lg font-extrabold text-gray-500 truncate dark:text-gray-400 text-4xl"
@@ -178,7 +159,12 @@
             {
               id: file.id + "_viewFile",
               text: "View File",
-              callback: () => {},
+              callback: () => {
+                var baseUrl =
+                  "http://localhost:8000/player?" +
+                  new URLSearchParams({ url: file.path });
+                window.open(baseUrl);
+              },
             },
             {
               id: file.id + "_fileInfo",
@@ -197,7 +183,19 @@
                 {
                   id: file.id + "_normalDownload",
                   text: "Direct",
-                  callback: () => {},
+                  callback: () => {
+                    fetch(
+                      "http://localhost:8000/download?" +
+                        new URLSearchParams({ filePath: file.path })
+                    ).then((response) => {
+                      if (!response.ok) {
+                        throw new Error(
+                          `HTTP error! Status: ${response.status}`
+                        );
+                      }
+                      return response.json();
+                    });
+                  },
                 },
               ],
             },
@@ -233,7 +231,30 @@
                     {
                       id: file.id + "_allHlsFormat",
                       text: "ALL",
-                      callback: () => {},
+                      callback: () => {
+                        fetch("http://localhost:8000/video/transcode", {
+                          method: "POST",
+                          body: JSON.stringify({
+                            paths: [file.path],
+                            options: {},
+                          }),
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                        })
+                          .then((response) => {
+                            if (response.status === 204) {
+                              return response.text();
+                            }
+                            if (!response.ok) {
+                              throw new Error("Network response was not ok");
+                            }
+                            return response.json(); // Parse the JSON response
+                          })
+                          .then((data) => {
+                            console.log(data);
+                          });
+                      },
                     },
                     {
                       id: file.id + "_hls1080p",
@@ -268,10 +289,29 @@
           ])
         );
         fileSizeDiv.append(optionsDiv);
-        innerDiv.append(imageDiv, textDiv, fileSizeDiv);
-        liElement.append(innerDiv);
+        innerDiv.append(imageDiv, textDiv);
+        outerDiv.append(innerDiv, fileSizeDiv);
+        liElement.append(outerDiv);
 
         return liElement;
+      }
+
+      function isVideo(extension) {
+        return (
+          extension.includes("mp4") ||
+          extension.includes("mkv") ||
+          extension.includes("webm") ||
+          extension.includes("ts")
+        );
+      }
+
+      function isImage(extension) {
+        return (
+          extension.includes("png") ||
+          extension.includes("jpg") ||
+          extension.includes("jpeg") ||
+          extension.includes("webm")
+        );
       }
 
       function previousDir(dir) {
@@ -305,7 +345,7 @@
           .then((data) => {
             $(document).ready(function () {
               listView.setItems(data.files);
-              listView.init(injectListItemContent);
+              listView.init(ListViewItem);
               loadThumbnails(listView.updateVisibleItems());
               return Promise.resolve();
             });
@@ -385,7 +425,7 @@
               tree.splice(0, tree.length);
               tree.push(data.dir);
               listView.setItems(data.files);
-              listView.init(injectListItemContent);
+              listView.init(ListViewItem);
               loadThumbnails(listView.updateVisibleItems());
             });
           })

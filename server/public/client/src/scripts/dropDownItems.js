@@ -3,7 +3,7 @@ function createDropdown(id, anchor, menuItems) {
   anchor.on("click", function (event) {
     const dropdown = $(`#${id}_dropdown`);
     updateDropDownPosition(anchor, dropdown);
-    event.stopPropagation();
+    // event.stopPropagation();
   });
   // Create the dropdown menu div
   var $dropdown = $("<div></div>", {

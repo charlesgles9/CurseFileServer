@@ -104,15 +104,18 @@ router.get("/closedir/", (req, res) => {
 
 router.post("/thumbnail", (req, res) => {
   const { files } = req.body;
+  console.log("Loading thumbnails...");
   ImgLoader.loadImageThumbnail(files as string[])
     .then((buffers) => {
       res.send({
         buffers: buffers,
         parent: new Path((files as string[])[0]).parent().toString(),
       });
+      console.log("Thumbnails loaded...");
     })
     .catch((error) => {
-      console.log(error.message);
+      res.status(500).send("Error Loading thumbnail");
+      console.log("Error loading thumbnails : " + error.message);
     });
 });
 

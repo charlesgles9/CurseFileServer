@@ -10,7 +10,8 @@ export class ImgLoader {
     return (
       extension.includes("png") ||
       extension.includes("jpg") ||
-      extension.includes("jpeg")
+      extension.includes("jpeg") ||
+      extension.includes("webm")
     );
   }
 
@@ -18,7 +19,8 @@ export class ImgLoader {
     return (
       extension.includes("mp4") ||
       extension.includes("mkv") ||
-      extension.includes("webm")
+      extension.includes("webm") ||
+      extension.includes("ts")
     );
   }
 
@@ -55,15 +57,20 @@ export class ImgLoader {
       } else return null;
     };
     return new Promise((resolve, reject) => {
-      const promises = files.map((value) => fetchThumbnail(value));
+      const promises = files
+        .map((value) => fetchThumbnail(value))
+        .filter((value) => value != undefined || value != null);
       const array_buffers = Promise.all(promises);
       resolve(array_buffers);
     });
   }
 
   // extract video thumbnail and cache it
-  private static extractVideoThumbnail = (file: string): Promise<Buffer> => {
+  private static extractVideoThumbnail = (
+    file: string
+  ): Promise<Buffer | null> => {
     return new Promise((resolve, reject) => {
+      if (new Path(file).isFolder()) return resolve(null);
       const targetPath = new Path(os.homedir())
         .join("CurseFileServer", ".thumbnails")
         .toString();

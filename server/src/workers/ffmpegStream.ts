@@ -87,10 +87,12 @@ class FFmpegStream {
       .on("end", () => {
         this.event.emit("finish", this.outputPath);
         console.log("Transcoding finished!");
+        this.ffmpeg?.kill("SIGINT");
       })
       .on("error", (err) => {
         this.event.emit("failure", this.outputPath, err.message);
         console.log(`Error converting video: ${err.message}  ${err.code}`);
+        this.ffmpeg?.kill("SIGINT");
       });
     this.ffmpeg.run();
   }
@@ -189,8 +191,11 @@ class TranscodeQueue {
         }
       }
       paths.forEach((path: Path) => {
+        const parent = Hash("transcode", path.parent().toString());
         const fileName = Hash("transcode", path.toString());
-        const outputFolder = new Path(this.outputPath).join(fileName);
+        const outputFolder = new Path(this.outputPath)
+          .join(parent)
+          .join(fileName);
         Path.createFolder(outputFolder.toString());
         this.queue.enqueue(
           new FFmpegStream(

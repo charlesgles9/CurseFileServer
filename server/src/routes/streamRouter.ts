@@ -8,18 +8,25 @@ const router = express.Router();
 const transcodeQueue = new TranscodeQueue();
 router.get("/video/stream", (req, res) => {
   const { path, quality, startTime } = req.query;
-
+  console.log(path);
   if (path) {
-    const parent = new Path(Hash("transcode", path.toString()));
-    console.log(parent.toString());
+    const pathObject = new Path(path.toString());
+    const parent1 = new Path(Hash("transcode", pathObject.parent().toString()));
+    const parent2 = new Path(Hash("transcode", path.toString()));
     const file = new Path(os.homedir())
       .join("CurseFileServer", "stream")
-      .join(parent.toString())
+      .join(parent1.toString())
+      .join(parent2.toString())
       .join("output.m3u8");
     file
       .exists()
       .then(() => {
-        res.send({ m3u8: parent.join(file.fileName()).toString() });
+        res.send({
+          m3u8: parent1
+            .join(parent2.toString())
+            .join(file.fileName())
+            .toString(),
+        });
       })
       .catch((err) => {
         res.status(404).send("File not transcoded!");
