@@ -4,9 +4,11 @@ import { Path } from "../io/path";
 import { Directory } from "../io/directory";
 import { DirTree } from "../ds/dirtree";
 import os, { type } from "os";
+import { ZipQueue } from "../workers/zipQueue";
 
 const router = express.Router();
 const dirTree: DirTree = new DirTree();
+const zipQueue = new ZipQueue();
 router.get("/", (req: Request, res: Response): void => {
   const path: Path = new Path(os.homedir());
   const dir: Directory = dirTree.opendir(path); //new Directory(path.join("Documents"))
@@ -146,5 +148,26 @@ router.get("/download", (req, res) => {
   stream.on("end", () => {
     console.log("Download complete");
   });
+});
+
+router.post("/zip", (req, res) => {
+  const { files, outputFolder, download } = req.body;
+  console.log(files, outputFolder);
+  if (files && outputFolder) {
+    console.log("Zipping...");
+    zipQueue.addArgs({
+      files: files,
+      outputPath: new Path(outputFolder)
+        .join(Path.ExtractFileName(outputFolder) + ".zip")
+        .toString(),
+    });
+
+    zipQueue.getEvent().addEventListener("finish", (message: string) => {
+      console.log("File zipped!");
+      if (zipQueue.isRunning())
+        res.status(200).send({ message: "File zipped!" });
+    });
+  }
+  if (!zipQueue.isRunning()) zipQueue.startJob();
 });
 export default router;

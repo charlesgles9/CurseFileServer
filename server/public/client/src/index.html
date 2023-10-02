@@ -18,10 +18,12 @@
     }
   </style>
   <body class="bg-gray-900">
-    <div class="container-xl">
+    <div class="container-full">
       <!-- navbar Start-->
-      <nav id="navbar" class="sticky container top-0"></nav>
-
+      <nav
+        id="navbar"
+        class="sticky container-full top-0 bg-gray-900 border z-50"
+      ></nav>
       <!--Navbar End -->
       <div class="container-full flex flex-col">
         <div
@@ -29,8 +31,8 @@
           style="position: relative"
         >
           <div
-            class="container max-w-4xl xl:max-w-2xl self-center flex bg-gray-900 items-center"
-            style="position: fixed; top: 0"
+            class="container max-w-4xl xl:max-w-2xl self-center flex bg-gray-900 items-center top-16 border"
+            style="position: fixed"
           >
             <button class="w-32 h-32 lg:w-16 lg:h-16" id="previousDir">
               <span>
@@ -58,7 +60,7 @@
           <div id="sidebar"></div>
           <!--Side bar end-->
           <ul
-            class="container max-w-4xl xl:max-w-2xl divide-y divide-gray-200 self-center dark:divide-gray-500"
+            class="container max-w-4xl xl:max-w-2xl divide-y divide-gray-200 self-center dark:divide-gray-500 border"
             id="fileList"
           ></ul>
         </div>
@@ -93,8 +95,6 @@
             }
           );
         });
-
-        $(document).ready(() => {});
       }
       function ListViewItem(file) {
         var liElement = $("<li>").addClass(
@@ -109,6 +109,7 @@
               // push this directory to our stack
               tree.push({
                 parent: file.parent,
+                current: file.path,
                 scrollTop: $(document).scrollTop(),
               });
               nextDir(file.path);
@@ -226,7 +227,31 @@
                 {
                   id: file.id + "_asZip",
                   text: "zip",
-                  callback: () => {},
+                  callback: () => {
+                    fetch("http://localhost:8000/zip", {
+                      method: "POST",
+                      body: JSON.stringify({
+                        files: [file.path],
+                        outputFolder: tree[tree.length - 1].current,
+                        download: false,
+                      }),
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                    })
+                      .then((response) => {
+                        if (response.status === 204) {
+                          return response.text();
+                        }
+                        if (!response.ok) {
+                          throw new Error("Network response was not ok");
+                        }
+                        return response.json(); // Parse the JSON response
+                      })
+                      .then((data) => {
+                        console.log(data);
+                      });
+                  },
                 },
                 {
                   id: file.id + "_as7z",

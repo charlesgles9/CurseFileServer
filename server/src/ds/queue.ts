@@ -1,4 +1,4 @@
-export class Queue<T> {
+class Queue<T> {
   private data: T[];
   private pool: number;
   constructor(pool: number);
@@ -46,3 +46,43 @@ export class Queue<T> {
     return this.data.splice(0, this.data.length);
   }
 }
+
+interface QueueEventArgs {
+  finish: [arg: string];
+  failure: [argA: string, ArgB: string];
+  progress: [arg: number];
+  killed: [arg: string];
+}
+
+interface QueueEventInterface {
+  addEventListener<K extends keyof QueueEventArgs>(
+    e: K,
+    cb: (...args: QueueEventArgs[K]) => void
+  ): void;
+  emit<K extends keyof QueueEventArgs>(e: K, ...args: QueueEventArgs[K]): void;
+}
+
+function QueueEvent(): QueueEventInterface {
+  const listenerMap: {
+    [K in keyof QueueEventArgs]?: ((...args: QueueEventArgs[K]) => void)[];
+  } = {};
+  const ret: QueueEventInterface = {
+    addEventListener<K extends keyof QueueEventArgs>(
+      e: K,
+      cb: (...args: QueueEventArgs[K]) => void
+    ) {
+      const listeners: ((...args: QueueEventArgs[K]) => void)[] = (listenerMap[
+        e
+      ] ??= []);
+      listeners.push(cb);
+    },
+    emit<K extends keyof QueueEventArgs>(e: K, ...a: QueueEventArgs[K]) {
+      const listeners: ((...args: QueueEventArgs[K]) => void)[] =
+        listenerMap[e] ?? [];
+      listeners.forEach((cb) => cb(...a));
+    },
+  };
+  return ret;
+}
+
+export { Queue, QueueEvent, QueueEventArgs, QueueEventInterface };

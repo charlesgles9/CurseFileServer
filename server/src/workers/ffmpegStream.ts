@@ -1,44 +1,8 @@
 import ffmpeg from "fluent-ffmpeg";
 import { Path } from "../io/path";
 import { Directory } from "../io/directory";
-import { Queue } from "../ds/queue";
+import { Queue, QueueEvent, QueueEventInterface } from "../ds/queue";
 import Hash from "../utils/hash";
-interface QueueEventArgs {
-  finish: [string];
-  failure: [string, string];
-  progress: [number];
-}
-
-interface QueueEventInterface {
-  addEventListener<K extends keyof QueueEventArgs>(
-    e: K,
-    cb: (...args: QueueEventArgs[K]) => void
-  ): void;
-  emit<K extends keyof QueueEventArgs>(e: K, ...args: QueueEventArgs[K]): void;
-}
-
-function QueueEvent(): QueueEventInterface {
-  const listenerMap: {
-    [K in keyof QueueEventArgs]?: ((...args: QueueEventArgs[K]) => void)[];
-  } = {};
-  const ret: QueueEventInterface = {
-    addEventListener<K extends keyof QueueEventArgs>(
-      e: K,
-      cb: (...args: QueueEventArgs[K]) => void
-    ) {
-      const listeners: ((...args: QueueEventArgs[K]) => void)[] = (listenerMap[
-        e
-      ] ??= []);
-      listeners.push(cb);
-    },
-    emit<K extends keyof QueueEventArgs>(e: K, ...a: QueueEventArgs[K]) {
-      const listeners: ((...args: QueueEventArgs[K]) => void)[] =
-        listenerMap[e] ?? [];
-      listeners.forEach((cb) => cb(...a));
-    },
-  };
-  return ret;
-}
 
 class FFmpegStream {
   private outputPath: string;
@@ -244,4 +208,4 @@ class TranscodeQueue {
     } else return Promise.reject();
   }
 }
-export { FFmpegStream, TranscodeQueue, QueueEventArgs };
+export { FFmpegStream, TranscodeQueue };

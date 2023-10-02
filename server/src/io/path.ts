@@ -16,7 +16,11 @@ export class Path {
   }
 
   public fileName(): String {
-    return this.path.substring(this.path.lastIndexOf(sep) + 1);
+    return Path.ExtractFileName(this.path.toString());
+  }
+
+  public static ExtractFileName(path: string): string {
+    return path.substring(path.lastIndexOf(sep) + 1);
   }
 
   public extension(): String {
@@ -176,5 +180,9 @@ export class Path {
 
   public static createReadStream(path: string): fs.ReadStream {
     return fs.createReadStream(path);
+  }
+
+  public static createWriteStream(path: string): fs.WriteStream {
+    return fs.createWriteStream(path);
   }
 }
