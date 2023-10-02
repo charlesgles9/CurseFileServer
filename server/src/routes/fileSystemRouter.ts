@@ -162,6 +162,9 @@ router.post("/zip", (req, res) => {
         .toString(),
     });
 
+    zipQueue.getEvent().addEventListener("progress", (progress: number) => {
+      console.log("%progress: " + progress);
+    });
     zipQueue.getEvent().addEventListener("finish", (message: string) => {
       console.log("File zipped!");
       if (zipQueue.isRunning())
