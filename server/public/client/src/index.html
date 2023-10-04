@@ -6,6 +6,7 @@
     <script src="dist/jquery-3.7.0.min.js"></script>
     <script src="src/scripts/ListView.js"></script>
     <script src="src/scripts/dropDownItems.js"></script>
+    <script src="src/scripts/inputDialog.js"></script>
   </head>
   <style>
     body {
@@ -75,6 +76,10 @@
 
       function InitNavbar() {
         $(document).ready(() => {
+          InputDialog(
+            () => {},
+            () => {}
+          ).show();
           $("#navbar").load("src/navbar.html");
           $("#sidebar").load(
             "src/drawer.html",
